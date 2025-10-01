@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+// bcrypt itu untuk hashing
 
 const userSchema = new mongoose.Schema({
   username: {
