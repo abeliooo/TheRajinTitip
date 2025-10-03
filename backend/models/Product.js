@@ -1,77 +1,67 @@
 const mongoose = require('mongoose');
 
-const bidSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const bidSchema = mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
   },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-}, {
-  _id: false 
-});
-
-const productSchema = new mongoose.Schema({
-  user: { 
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'User',
-  },
-  name: {
-    type: String,
-    required: [true, 'Nama barang harus diisi'],
-  },
-  image: {
-    type: String,
-    required: [true, 'Gambar barang harus diunggah'],
-  },
-  description: {
-    type: String,
-    required: [true, 'Deskripsi barang harus diisi'],
-  },
-  startingPrice: {
-    type: Number,
-    required: [true, 'Harga awal harus diisi'],
-    default: 0,
-  },
-  currentPrice: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  auctionEndDate: {
-    type: Date,
-    required: [true, 'Tanggal akhir lelang harus ditentukan'],
-  },
-  bids: [bidSchema],
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending',
-  },
-  isSold: {
-    type: Boolean,
-    default: false,
-  },
-}, {
-  timestamps: true,
-});
-
-productSchema.pre('save', function(next) {
-  if (this.isNew) {
-    this.currentPrice = this.startingPrice;
+  {
+    timestamps: true,
   }
-  next();
-});
+);
+
+const productSchema = mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User', 
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    startingPrice: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    currentPrice: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    auctionEndDate: {
+      type: Date,
+      required: true,
+    },
+    isSold: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    bids: [bidSchema], 
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
-

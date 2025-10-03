@@ -7,6 +7,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [bidAmount, setBidAmount] = useState('');
+  const [success, setSuccess] = useState('');
 
   const { id: productId } = useParams();
 
@@ -25,9 +26,32 @@ const ProductDetail = () => {
     fetchProduct();
   }, [productId]);
 
-  const placeBidHandler = (e) => {
+  const placeBidHandler = async (e) => {
     e.preventDefault();
-    alert(`Fitur penawaran untuk Rp ${bidAmount} belum diimplementasikan.`);
+    setSuccess(''); 
+    
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+
+      const { data } = await axios.post(
+        `http://localhost:5000/api/products/${productId}/bids`,
+        { amount: bidAmount },
+        config
+      );
+
+      setSuccess('Tawaran Anda berhasil ditempatkan!');
+      setProduct(data); 
+      setBidAmount(''); 
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal menempatkan tawaran.');
+    }
   };
 
   return (
@@ -60,6 +84,9 @@ const ProductDetail = () => {
                     Waktu Sisa: 3j 14m 5s 
                 </p>
             </div>
+
+            {error && <p className="text-red-400 text-center my-4">{error}</p>}
+            {success && <p className="text-green-400 text-center my-4">{success}</p>}
 
             <form onSubmit={placeBidHandler}>
                 <label htmlFor="bid" className="block text-sm font-medium text-gray-300 mb-2">

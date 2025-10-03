@@ -50,5 +50,36 @@ const createProduct = asyncHandler(async (req, res) => {
   res.status(201).json(createdProduct);
 });
 
-module.exports = { getProducts, getProductById, createProduct };
+const placeBid = asyncHandler(async (req, res) => {
+  const { amount } = req.body;
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    if (new Date() > product.auctionEndDate) {
+        res.status(400);
+        throw new Error('Lelang untuk produk ini sudah berakhir.');
+    }
+    
+    if (amount <= product.currentPrice) {
+      res.status(400);
+      throw new Error('Tawaran harus lebih tinggi dari harga saat ini.');
+    }
+
+    const bid = {
+      user: req.user._id,
+      amount: Number(amount),
+    };
+
+    product.bids.push(bid);
+    product.currentPrice = amount;
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } else {
+    res.status(404);
+    throw new Error('Produk tidak ditemukan');
+  }
+});
+
+module.exports = { getProducts, getProductById, createProduct, placeBid };
 
