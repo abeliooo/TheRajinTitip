@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../api/axios';
@@ -9,16 +9,24 @@ import Button from './Button';
 const socket = io('http://localhost:5000');
 
 const ProductDetail = () => {
-  const [product, setProduct] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [bidAmount, setBidAmount] = useState('');
-  const [success, setSuccess] = useState('');  
+  const [product, setProduct] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState('');
+  const [bidAmount, setBidAmount] = React.useState('');
+  const [success, setSuccess] = React.useState('');
   const timeLeft = useCountdown(product.auctionEndDate);
 
   const { id: productId } = useParams();
 
-  useEffect(() => {
+  const userInfo = React.useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userInfo'));
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  React.useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
@@ -49,24 +57,68 @@ const ProductDetail = () => {
     setError('');
     
     try {
-      const { token } = JSON.parse(localStorage.getItem('userInfo'));
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      const { data } = await api.post(
-        `/products/${productId}/bids`,
-        { amount: bidAmount },
-        config
-      );
-
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data } = await api.post(`/products/${productId}/bids`, { amount: bidAmount }, config);
       setSuccess('Your bid has been placed!');
       setProduct(data); 
       setBidAmount(''); 
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to place bid.');
+    }
+  };
+
+  const isAuctionEnded = timeLeft === 'Auction ended';
+  const highestBidder = product.bids && product.bids.length > 0 ? product.bids[product.bids.length - 1] : null;
+  const isWinner = highestBidder && userInfo && highestBidder.user._id === userInfo._id;
+
+  const renderAuctionStatus = () => {
+    if (!isAuctionEnded) {
+      return (
+        <form onSubmit={placeBidHandler}>
+          <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-300 mb-2">
+            Enter your bid (must be higher than the current price)
+          </label>
+          <div className="flex gap-4">
+            <Input 
+              name="bidAmount"
+              type="number"
+              value={bidAmount}
+              onChange={(e) => setBidAmount(e.target.value)}
+              placeholder={`min. Rp ${(product.currentPrice + 1)?.toLocaleString('id-ID')}`}
+              required
+            />
+            <Button type="submit">Bid</Button>
+          </div>
+        </form>
+      );
+    } else {
+      if (isWinner) {
+        return (
+          <div className="text-center bg-green-900/50 border border-green-500 p-6 rounded-lg">
+            <h3 className="text-2xl font-bold text-green-300">Congratulations, you won!</h3>
+            <p className="mt-2 text-gray-300">You won this auction with a bid of Rp {highestBidder.amount.toLocaleString('id-ID')}.</p>
+            <Button onClick={() => alert('Payment flow not implemented yet.')} className="mt-4">
+              Proceed to Payment
+            </Button>
+          </div>
+        );
+      } else if (highestBidder) {
+        return (
+          <div className="text-center bg-gray-900 p-6 rounded-lg">
+            <h3 className="text-xl font-bold text-gray-300">This auction has ended.</h3>
+            <p className="mt-2 text-gray-400">
+              The winner is  <span className="font-bold text-orange-400">{highestBidder.user.username}</span> with a bid of Rp {highestBidder.amount.toLocaleString('id-ID')}.
+            </p>
+          </div>
+        );
+      } else {
+        return (
+          <div className="text-center bg-gray-900 p-6 rounded-lg">
+            <h3 className="text-xl font-bold text-gray-300">This auction has ended.</h3>
+            <p className="mt-2 text-gray-400">There were no bids for this item.</p>
+          </div>
+        );
+      }
     }
   };
 
@@ -79,10 +131,10 @@ const ProductDetail = () => {
       {loading ? <p>Loading...</p> : error ? <p className="text-red-400">{error}</p> : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-full rounded-lg shadow-lg" />
+            <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-full h-full object-cover rounded-lg shadow-lg" />
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col">
             <h1 className="text-4xl font-bold mb-3 text-orange-400">{product.name}</h1>
             <p className="text-sm text-gray-400 mb-4">Auctioned by: {product.user?.username || 'Anonymous'}</p>
             
@@ -96,32 +148,21 @@ const ProductDetail = () => {
               <p className="text-3xl font-bold text-orange-500">
                   Rp {product.currentPrice?.toLocaleString('id-ID')}
               </p>
-              <p className="text-sm text-yellow-400 mt-1">
+              {highestBidder && !isAuctionEnded && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Highest Bid by: <span className="font-semibold text-orange-400">{highestBidder.user.username}</span>
+                </p>
+              )}
+              <p className={`text-sm mt-1 ${isAuctionEnded ? 'text-red-400' : 'text-yellow-400'}`}>
                   Time Left: {timeLeft || 'Calculating...'}
               </p>
             </div>
-
-            {error && <p className="text-red-400 text-center my-4">{error}</p>}
-            {success && <p className="text-green-400 text-center my-4">{success}</p>}
-
-            <form onSubmit={placeBidHandler}>
-                <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-300 mb-2">
-                    Enter your bid (must be higher than the current price)
-                </label>
-                <div className="flex gap-4">
-                    <Input 
-                        name="bidAmount"
-                        type="number"
-                        value={bidAmount}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        placeholder={`min. Rp ${(product.currentPrice + 1)?.toLocaleString('id-ID')}`}
-                        required
-                    />
-                    <Button type="submit">
-                        Bid
-                    </Button>
-                </div>
-            </form>
+            
+            <div className="mt-auto">
+              {error && <p className="text-red-400 text-center mb-4">{error}</p>}
+              {success && <p className="text-green-400 text-center mb-4">{success}</p>}
+              {renderAuctionStatus()}
+            </div>
           </div>
         </div>
       )}

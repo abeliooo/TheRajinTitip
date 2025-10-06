@@ -22,7 +22,7 @@ const ProductCard = ({ product }) => {
         </p>
 
         <div className="text-center text-sm bg-gray-700 rounded-full px-3 py-1 mb-4 text-yellow-300">
-          {timeLeft || 'Calculating...'} Left
+          {timeLeft || 'Calculating...'}
         </div>
 
         <Link

@@ -16,10 +16,9 @@ const getProducts = asyncHandler(async (req, res) => {
 // @route   GET /api/products/:id
 // @access  Public
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id).populate(
-    'user',
-    'username'
-  );
+  const product = await Product.findById(req.params.id)
+    .populate('user', 'username')
+    .populate('bids.user', 'username');
 
   if (product) {
     res.json(product);
@@ -28,7 +27,6 @@ const getProductById = asyncHandler(async (req, res) => {
     throw new Error('Product not found');
   }
 });
-
 
 // @desc    Create a new product
 // @route   POST /api/products
@@ -74,6 +72,7 @@ const placeBid = asyncHandler(async (req, res) => {
     product.currentPrice = amount;
 
     const updatedProduct = await product.save();
+    await updatedProduct.populate('bids.user', 'username');
     
     req.io.emit('bid_update', updatedProduct);
     res.json(updatedProduct);
@@ -84,4 +83,3 @@ const placeBid = asyncHandler(async (req, res) => {
 });
 
 module.exports = { getProducts, getProductById, createProduct, placeBid };
-
