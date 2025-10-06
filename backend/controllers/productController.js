@@ -25,7 +25,7 @@ const getProductById = asyncHandler(async (req, res) => {
     res.json(product);
   } else {
     res.status(404);
-    throw new Error('Produk tidak ditemukan');
+    throw new Error('Product not found');
   }
 });
 
@@ -52,17 +52,17 @@ const createProduct = asyncHandler(async (req, res) => {
 
 const placeBid = asyncHandler(async (req, res) => {
   const { amount } = req.body;
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.params.id).populate('user bids.user', 'username');
 
   if (product) {
     if (new Date() > product.auctionEndDate) {
         res.status(400);
-        throw new Error('Lelang untuk produk ini sudah berakhir.');
+        throw new Error('The auction fo this product has ended.');
     }
     
     if (amount <= product.currentPrice) {
       res.status(400);
-      throw new Error('Tawaran harus lebih tinggi dari harga saat ini.');
+      throw new Error('Bid must be higher than current price.');
     }
 
     const bid = {
@@ -74,10 +74,12 @@ const placeBid = asyncHandler(async (req, res) => {
     product.currentPrice = amount;
 
     const updatedProduct = await product.save();
+    
+    req.io.emit('bid_update', updatedProduct);
     res.json(updatedProduct);
   } else {
     res.status(404);
-    throw new Error('Produk tidak ditemukan');
+    throw new Error('Product not found.');
   }
 });
 

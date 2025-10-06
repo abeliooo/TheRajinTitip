@@ -5,6 +5,7 @@ import HomeScreen from './pages/HomeScreen';
 import LoginScreen from './auth/LoginScreen';
 import RegisterScreen from './auth/RegisterScreen';
 import ProductDetail from './components/ProductDetails';
+import SellScreen from './pages/SellScreen';
 
 function App() {
   const [userInfo, setUserInfo] = useState(null);
@@ -17,7 +18,6 @@ function App() {
         setUserInfo(JSON.parse(storedUserInfo));
       }
     } catch (error) {
-      console.error("Gagal mem-parsing userInfo dari localStorage", error);
       localStorage.removeItem('userInfo'); 
     } finally {
       setLoading(false); 
@@ -32,7 +32,7 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex justify-center items-center text-white">
-        Tunggu Bentar Boss...
+        Loading...
       </div>
     );
   }
@@ -47,6 +47,10 @@ function App() {
         <Route 
           path="/product/:id" 
           element={userInfo ? <ProductDetail /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/sell" 
+          element={userInfo ? <SellScreen /> : <Navigate to="/login" />} 
         />
         
         <Route path="/" element={<Navigate to={userInfo ? "/home" : "/login"} />} />

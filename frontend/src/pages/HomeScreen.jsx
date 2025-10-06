@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../components/ProductCard';
+import Button from '../components/Button';
 
 const HomeScreen = ({ userInfo, onLogout }) => {
   const [products, setProducts] = useState([]);
@@ -14,7 +16,7 @@ const HomeScreen = ({ userInfo, onLogout }) => {
         const { data } = await axios.get('http://localhost:5000/api/products');
         setProducts(data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Gagal memuat data produk.');
+        setError(err.response?.data?.message || 'Failed to load data product.');
       } finally {
         setLoading(false);
       }
@@ -26,25 +28,23 @@ const HomeScreen = ({ userInfo, onLogout }) => {
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 shadow-md px-8 py-4 flex justify-between items-center sticky top-0 z-10">
         <h1 className="text-2xl font-bold text-orange-500">The Rajin Titip</h1>
-        <div className="flex items-center">
-          <span className="mr-4">Selamat datang, {userInfo.username}!</span>
-          <button
-            onClick={onLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
-          >
-            Logout
-          </button>
-        </div>
+        <div className="flex items-center gap-4">
+          <span>Welcome, {userInfo.username}!</span>
+          <Link to="/sell" className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
+            + Titip
+          </Link>
+          <Button onClick={onLogout} variant="danger">Logout</Button>
+      </div>
       </header>
       <main className="p-8">
-        <h2 className="text-3xl font-bold mb-6 border-b-2 border-orange-500 pb-2">Barang Lelang Saat Ini</h2>
-        {loading ? <p className="text-center text-lg">Memuat produk...</p> : error ? <p className="text-center text-red-400">{error}</p> : (
+        <h2 className="text-3xl font-bold mb-6 border-b-2 border-orange-500 pb-2">Current Auction Items</h2>
+        {loading ? <p className="text-center text-lg">Loading...</p> : error ? <p className="text-center text-red-400">{error}</p> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.length > 0 ? (
               products.map(product => <ProductCard key={product._id} product={product} />)
             ) : (
               <div className="col-span-full text-center py-10">
-                <p className="text-xl text-gray-400">Belum ada barang yang dilelang saat ini.</p>
+                <p className="text-xl text-gray-400">There are no items currently being auctioned.</p>
               </div>
             )}
           </div>

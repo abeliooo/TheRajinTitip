@@ -12,7 +12,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ $or: [{ email }, { username }] });
   if (userExists) {
     res.status(400);
-    throw new Error('Email atau Username sudah terdaftar');
+    throw new Error('Email or Username already registered');
   }
 
   let user;
@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('Data pengguna tidak valid');
+    throw new Error('User data is invalid');
   }
 });
 
@@ -67,7 +67,7 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    throw new Error('Email atau password salah');
+    throw new Error('Email or password wrong');
   }
 });
 
