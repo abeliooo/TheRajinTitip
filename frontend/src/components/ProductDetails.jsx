@@ -1,10 +1,11 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../api/axios';
 import useCountdown from '../hooks/useCountdown';
 import Input from './Input';
 import Button from './Button';
+import PaymentScreen from '../pages/PaymentScreen';
 
 const socket = io('http://localhost:5000');
 
@@ -15,6 +16,7 @@ const ProductDetail = () => {
   const [bidAmount, setBidAmount] = React.useState('');
   const [success, setSuccess] = React.useState('');
   const timeLeft = useCountdown(product.auctionEndDate);
+  const navigate = useNavigate();
 
   const { id: productId } = useParams();
 
@@ -25,6 +27,20 @@ const ProductDetail = () => {
       return null;
     }
   }, []);
+
+  const handleProceedToPayment = async () => {
+    setError('');
+    try {
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      
+      const { data: transactionData } = await api.post('/transactions', { productId }, config);
+      
+      navigate('/payment', { state: { transaction: transactionData } });
+
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to proceed payment.');
+    }
+  };
 
   React.useEffect(() => {
     const fetchProduct = async () => {
@@ -97,7 +113,7 @@ const ProductDetail = () => {
           <div className="text-center bg-green-900/50 border border-green-500 p-6 rounded-lg">
             <h3 className="text-2xl font-bold text-green-300">Congratulations, you won!</h3>
             <p className="mt-2 text-gray-300">You won this auction with a bid of Rp {highestBidder.amount.toLocaleString('id-ID')}.</p>
-            <Button onClick={() => alert('Payment flow not implemented yet.')} className="mt-4">
+            <Button onClick={handleProceedToPayment} className="mt-4">
               Proceed to Payment
             </Button>
           </div>

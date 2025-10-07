@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware.js');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

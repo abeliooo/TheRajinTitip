@@ -6,6 +6,9 @@ import LoginScreen from './auth/LoginScreen';
 import RegisterScreen from './auth/RegisterScreen';
 import ProductDetail from './components/ProductDetails';
 import SellScreen from './pages/SellScreen';
+import PaymentScreen from './pages/PaymentScreen';
+import TransactionHistoryScreen from './pages/TransactionHistoryScreen';
+import TransactionDetailScreen from './pages/TransactionDetailScreen';
 
 function App() {
   const [userInfo, setUserInfo] = useState(null);
@@ -52,6 +55,18 @@ function App() {
           path="/sell" 
           element={userInfo ? <SellScreen /> : <Navigate to="/login" />} 
         />
+        <Route 
+          path="/payment" 
+          element={userInfo ? <PaymentScreen /> : <Navigate to="/login" />} 
+        /> 
+        <Route 
+          path="/history" 
+          element={userInfo ? <TransactionHistoryScreen /> : <Navigate to="/login" />} 
+        /> 
+        <Route 
+          path="/transaction/:id" 
+          element={userInfo ? <TransactionDetailScreen /> : <Navigate to="/login" />} 
+        /> 
         
         <Route path="/" element={<Navigate to={userInfo ? "/home" : "/login"} />} />
       </Routes>

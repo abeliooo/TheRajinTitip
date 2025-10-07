@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-// bcrypt itu untuk hashing
+// bycryptjs untuk enkripsi password
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
-  namaAsli: {
+  fullName: { 
     type: String,
     required: true,
     trim: true,
@@ -21,13 +21,13 @@ const userSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
-  nomorTelepon: {
+  phoneNumber: { 
     type: String,
     required: true,
     unique: true,
     trim: true,
   },
-  alamat: {
+  address: { 
     type: String,
     required: true,
   },
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  nomorRekening: {
+  accountNumber: { 
     type: String,
     required: true,
   },
@@ -48,11 +48,11 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+// Enkripsi password sebelum disimpan
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
-  
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -65,3 +65,4 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+

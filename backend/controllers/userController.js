@@ -6,8 +6,7 @@ const generateToken = require('../utils/generateToken.js');
 // @route   POST /api/users/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, namaAsli, email, nomorTelepon, alamat, password, nomorRekening } = req.body;
-  // req.body itu buat minta data ke frontend misal lewat form
+  const { username, fullName, email, phoneNumber, address, password, accountNumber } = req.body;
 
   const userExists = await User.findOne({ $or: [{ email }, { username }] });
   if (userExists) {
@@ -15,26 +14,15 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('Email or Username already registered');
   }
 
-  let user;
-  try {
-    user = await User.create({
-      username,
-      namaAsli,
-      email,
-      nomorTelepon,
-      alamat,
-      password,
-      nomorRekening,
-    });
-  } catch (error) {
-    res.status(400); 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(val => val.message);
-      throw new Error(messages.join(', '));
-    }
-    throw error;
-  }
-  
+  const user = await User.create({
+    username,
+    fullName,
+    email,
+    phoneNumber,
+    address,
+    password,
+    accountNumber,
+  });
 
   if (user) {
     res.status(201).json({
@@ -46,7 +34,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(400);
-    throw new Error('User data is invalid');
+    throw new Error('Invalid user data');
   }
 });
 
@@ -67,7 +55,8 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    throw new Error('Email or password wrong');
+    // Pesan error dalam Bahasa Inggris
+    throw new Error('Invalid email or password');
   }
 });
 

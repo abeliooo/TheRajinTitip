@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios'; 
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
 
@@ -13,10 +13,10 @@ const HomeScreen = ({ userInfo, onLogout }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get('http://localhost:5000/api/products');
+        const { data } = await api.get('/products');
         setProducts(data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load data product.');
+        setError(err.response?.data?.message || 'Failed to load products.');
       } finally {
         setLoading(false);
       }
@@ -30,11 +30,19 @@ const HomeScreen = ({ userInfo, onLogout }) => {
         <h1 className="text-2xl font-bold text-orange-500">The Rajin Titip</h1>
         <div className="flex items-center gap-4">
           <span>Welcome, {userInfo.username}!</span>
-          <Link to="/sell" className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
-            + Titip
+          
+          <Link to="/history" className="bg-gray-700 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded-lg">
+            History
           </Link>
-          <Button onClick={onLogout} variant="danger">Logout</Button>
-      </div>
+          <span className="border-r border-gray-600 h-6"></span> 
+
+          <Link to="/sell" className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
+            + Sell Item
+          </Link>
+          <Button onClick={onLogout} variant="danger">
+            Logout
+          </Button>
+        </div>
       </header>
       <main className="p-8">
         <h2 className="text-3xl font-bold mb-6 border-b-2 border-orange-500 pb-2">Current Auction Items</h2>
