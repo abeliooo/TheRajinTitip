@@ -84,6 +84,11 @@ const getTransactionById = asyncHandler(async (req, res) => {
 const updateTransactionToPaid = asyncHandler(async (req, res) => {
   const transaction = await Transaction.findById(req.params.id);
 
+  if (!req.file) {
+    res.status(400);
+    throw new Error('Payment proof file is required.');
+  }
+
   if (transaction) {
     if (transaction.buyer.toString() !== req.user._id.toString()) {
       res.status(401);
@@ -91,7 +96,7 @@ const updateTransactionToPaid = asyncHandler(async (req, res) => {
     }
 
     transaction.status = 'Waiting for Confirmation';
-    transaction.paymentProof = req.body.paymentProofUrl;
+    transaction.paymentProof = req.file.path.replace(/\\/g, "/");
 
     const updatedTransaction = await transaction.save();
     res.json(updatedTransaction);

@@ -8,6 +8,7 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware.js');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 app.use(notFound);
 app.use(errorHandler);

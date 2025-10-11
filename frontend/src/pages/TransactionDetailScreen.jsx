@@ -8,7 +8,8 @@ const TransactionDetailScreen = () => {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [paymentProofUrl, setPaymentProofUrl] = useState('');
+  const [paymentProofFile, setPaymentProofFile] = useState(null);
+  const [previewSource, setPreviewSource] = useState('');
 
   const { id: transactionId } = useParams();
   const navigate = useNavigate();
@@ -33,12 +34,41 @@ const TransactionDetailScreen = () => {
     fetchTransaction();
   }, [transactionId]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPaymentProofFile(file);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        setPreviewSource(reader.result);
+      };
+    }
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!paymentProofFile) {
+      alert('Please select a payment proof file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('paymentProof', paymentProofFile);
+
     setLoading(true);
-    try {
-      await api.put(`/transactions/${transactionId}/pay`, { paymentProofUrl });
-      alert('Payment proof submitted! The seller will be notified.');
+     try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      
+      await api.put(`/transactions/${transactionId}/pay`, formData, config);
+
+      alert('Payment proof submitted successfully!');
       navigate('/history'); 
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit payment proof.');
@@ -82,19 +112,28 @@ const TransactionDetailScreen = () => {
             </div>
 
             {status === 'Waiting for Payment' && (
-              <form onSubmit={submitHandler}>
+              <form onSubmit={submitHandler} className="mt-4">
                 <label htmlFor="paymentProof" className="block text-sm font-medium mb-2">
-                  Payment Proof URL
+                  Upload Payment Screenshot
                 </label>
-                <Input
-                  name="paymentProof"
-                  value={paymentProofUrl}
-                  onChange={(e) => setPaymentProofUrl(e.target.value)}
-                  placeholder="https://example.com/proof.jpg"
+                <input
+                  id="paymentProof"
+                  type="file"
+                  onChange={handleFileChange}
                   required
+                  className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-3xl file:border-0 file:text-sm file:font-semibold file:bg-white file:text-orange-600 hover:file:bg-orange-100"
                 />
-                <p className="text-xs text-gray-500 mt-1 mb-4">For now, please upload your proof to a service like Imgur and paste the URL here.</p>
-                <Button type="submit" fullWidth disabled={loading}>
+                <p className="text-xs text-gray-500 mt-1 mb-4">
+                  File types allowed: JPG, PNG. Max size: 5MB.
+                </p>
+
+                {previewSource && (
+                  <div className="my-4">
+                    <img src={previewSource} alt="Preview" className="max-h-60 rounded-lg mx-auto" />
+                  </div>
+                )}
+
+                <Button type="submit" fullWidth disabled={loading || !paymentProofFile}>
                   {loading ? 'Submitting...' : 'Confirm Payment'}
                 </Button>
               </form>
