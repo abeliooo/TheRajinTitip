@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 // @route   GET /api/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({ isSold: false })
+  const products = await Product.find({ status: 'approved', isSold: false })
     .populate('user', 'username') 
     .sort({ createdAt: -1 }); 
 
@@ -53,6 +53,11 @@ const placeBid = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id).populate('user bids.user', 'username');
 
   if (product) {
+    if (product.user.toString() === req.user._id.toString()) {
+      res.status(400); 
+      throw new Error('You cannot bid on your own product.');
+    }
+
     if (new Date() > product.auctionEndDate) {
         res.status(400);
         throw new Error('The auction fo this product has ended.');

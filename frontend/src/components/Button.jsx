@@ -7,6 +7,7 @@ const Button = ({
   children,
   variant = 'primary', // 'primary', 'danger', etc.
   fullWidth = false,
+  className = '',
 }) => {
   // Base styles
   let baseStyles = "px-4 py-2 font-semibold text-white rounded-lg transition-colors duration-300 disabled:cursor-not-allowed";
@@ -27,7 +28,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`${baseStyles} ${variantStyles} ${widthStyles}`}
+      className={`${baseStyles} ${variantStyles} ${widthStyles} ${className}`}
     >
       {children}
     </button>

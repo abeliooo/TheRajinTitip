@@ -7,13 +7,13 @@ import Button from '../components/Button';
 const RegisterScreen = () => {
   const [formData, setFormData] = useState({
     username: '',
-    namaAsli: '',
+    fullName: '',
     email: '',
-    nomorTelepon: '',
-    alamat: '',
+    phoneNumber: '',
+    address: '',
     password: '',
     confirmPassword: '',
-    nomorRekening: '',
+    accountNumber: '',
   });
   
   const [message, setMessage] = useState('');
@@ -62,16 +62,16 @@ const RegisterScreen = () => {
         <form onSubmit={submitHandler} className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
              <Input name="username" placeholder="Username" value={formData.username} onChange={handleChange} required />
-             <Input name="namaAsli" placeholder="Full Name" value={formData.namaAsli} onChange={handleChange} required />
+             <Input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} required />
           </div>
           <Input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-          <Input name="nomorTelepon" placeholder="Phone Number" value={formData.nomorTelepon} onChange={handleChange} required />
-          <Input name="alamat" placeholder="Address" value={formData.alamat} onChange={handleChange} required />
+          <Input name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleChange} required />
+          <Input name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
             <Input name="confirmPassword" type="password" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required />
           </div>
-          <Input name="nomorRekening" placeholder="Bank Account Number" value={formData.nomorRekening} onChange={handleChange} required />
+          <Input name="accountNumber" placeholder="Bank Account Number" value={formData.accountNumber} onChange={handleChange} required />
           
           <Button type="submit" disabled={loading} fullWidth>
             {loading ? 'Registering...' : 'Register'}

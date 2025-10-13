@@ -62,9 +62,9 @@ const TransactionHistoryScreen = () => {
                   to={`/transaction/${tx._id}`}
                   className="bg-gray-800 rounded-lg p-4 flex items-center gap-4 border border-gray-700 hover:border-orange-400 transition-all duration-200 cursor-pointer"
                 >
-                  <img src={tx.product.image || '/images/sample.jpg'} alt={tx.product.name} className="w-20 h-20 object-cover rounded-md" />
+                  <img src={tx.product?.image || '/images/sample.jpg'} alt={tx.product?.name} className="w-20 h-20 object-cover rounded-md" />
                   <div className="flex-grow">
-                    <h2 className="font-bold text-lg">{tx.product.name}</h2>
+                    <h2 className="font-bold text-lg">{tx.product?.name}</h2>
                     <p className="text-sm text-gray-400">Final Price: <span className="font-semibold text-orange-400">Rp {tx.amount.toLocaleString('id-ID')}</span></p>
                   </div>
                   <div className="text-right">

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import Input from '../components/Input'; 
-import Button from '../components/Button'; 
+import api from '../../api/axios';
+import Input from '../../components/Input'; 
+import Button from '../../components/Button'; 
 
 const LoginScreen = ({ setUserInfo }) => {
   const [email, setEmail] = useState('');
@@ -18,16 +18,13 @@ const LoginScreen = ({ setUserInfo }) => {
 
     try {
       const { data } = await api.post('/users/login', { email, password });
-
-      if (data && data.isAdmin) {
-        // Admin no no ya login di sini, no no
-        console.log("You are an admin bro... Admin cannot login here.")
-        return; 
-      }
       
+      if (data && data.isAdmin) {
       localStorage.setItem('userInfo', JSON.stringify(data));
-      setUserInfo(data);
-      navigate('/home');
+      navigate('/admin/dashboard'); 
+    } else {
+      setError('You are not authorized as an admin.');
+    }
 
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -39,7 +36,7 @@ const LoginScreen = ({ setUserInfo }) => {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-        <h1 className="text-3xl font-bold text-center text-white">Login</h1>
+        <h1 className="text-3xl font-bold text-center text-white">Admin Login</h1>
         {error && <div className="p-3 text-sm text-red-200 bg-red-800/50 rounded-lg text-center">{error}</div>}
         
         <form onSubmit={submitHandler} className="space-y-4">
@@ -76,3 +73,5 @@ const LoginScreen = ({ setUserInfo }) => {
 }
 
 export default LoginScreen;
+
+// code disini basically sama kayak LoginScreen.jsx yang bedain cuma di bagian submitHandler doang
