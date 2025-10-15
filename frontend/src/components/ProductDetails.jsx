@@ -86,9 +86,18 @@ const ProductDetail = () => {
   const isAuctionEnded = timeLeft === 'Auction ended';
   const highestBidder = product.bids && product.bids.length > 0 ? product.bids[product.bids.length - 1] : null;
   const isWinner = highestBidder && userInfo && highestBidder.user._id === userInfo._id;
+  const isSeller = product.user?._id === userInfo?._id;
 
   const renderAuctionStatus = () => {
     if (!isAuctionEnded) {
+      if (isSeller) {
+        return (
+          <div className="text-center bg-gray-700 p-6 rounded-lg">
+            <h3 className="text-xl font-bold text-gray-300">This is your own product.</h3>
+            <p className="mt-2 text-gray-400">You cannot bid on an item you are selling.</p>
+          </div>
+        );
+      }
       return (
         <form onSubmit={placeBidHandler}>
           <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-300 mb-2">

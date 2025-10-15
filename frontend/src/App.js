@@ -11,6 +11,7 @@ import TransactionHistoryScreen from './pages/TransactionHistoryScreen';
 import TransactionDetailScreen from './pages/TransactionDetailScreen';
 import AdminRoute from './components/AdminRoutes';
 import AdminLoginScreen from './pages/admin/AdminLoginScreen';
+import MyListingsScreen from './pages/MyListingsScreen';
 
 function App() {
   const [userInfo, setUserInfo] = useState(null);
@@ -69,6 +70,10 @@ function App() {
           path="/transaction/:id" 
           element={userInfo ? <TransactionDetailScreen /> : <Navigate to="/login" />} 
         /> 
+        <Route 
+          path="/my-listings" 
+          element={userInfo ? <MyListingsScreen /> : <Navigate to="/login" />} 
+        />
 
         <Route path="/admin/login" element={<AdminLoginScreen />} />
         <Route path="/admin/*" element={<AdminRoute onLogout={handleLogout} />} />

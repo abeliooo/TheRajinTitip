@@ -17,7 +17,7 @@ const getProducts = asyncHandler(async (req, res) => {
 // @access  Public
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
-    .populate('user', 'username')
+    .populate('user', 'username _id')
     .populate('bids.user', 'username');
 
   if (product) {
@@ -55,6 +55,7 @@ const placeBid = asyncHandler(async (req, res) => {
   if (product) {
     if (product.user.toString() === req.user._id.toString()) {
       res.status(400); 
+      console.log("no bid own product!!!")
       throw new Error('You cannot bid on your own product.');
     }
 
@@ -87,4 +88,21 @@ const placeBid = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { getProducts, getProductById, createProduct, placeBid };
+// @desc    Fetch all products for the logged in user
+/// @route   GET /api/products/my-products
+// @access  Private
+const getMyProducts = async (req, res) => {
+  const products = await Product.find({ user: req.user._id }).populate({
+    path: 'transaction',
+    select: 'status' 
+  });
+
+  if (products) {
+    res.json(products);
+  } else {
+    res.status(404);
+    throw new Error('No products found for this user.');
+  }
+};
+
+module.exports = { getProducts, getProductById, createProduct, placeBid, getMyProducts };

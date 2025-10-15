@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios'; 
 import ProductCard from '../components/ProductCard';
@@ -8,6 +8,8 @@ const HomeScreen = ({ userInfo, onLogout }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,9 +38,35 @@ const HomeScreen = ({ userInfo, onLogout }) => {
           </Link>
           <span className="border-r border-gray-600 h-6"></span> 
 
-          <Link to="/sell" className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
-            + Sell Item
-          </Link>
+          <div className="relative" ref={dropdownRef}>
+            {/* Tombol pemicu dropdown baru dengan ikon '+' */}
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="bg-orange-600 hover:bg-orange-700 text-white font-bold h-10 w-10 flex items-center justify-center rounded-lg text-xl"
+            >
+              +
+            </button>
+            
+            {/* Menu Dropdown */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg py-1 z-20">
+                <Link
+                  to="/sell"
+                  className="block px-4 py-2 text-sm text-white hover:bg-gray-600"
+                  onClick={() => setIsDropdownOpen(false)} 
+                >
+                  Sell Item
+                </Link>
+                <Link
+                  to="/my-listings"
+                  className="block px-4 py-2 text-sm text-white hover:bg-gray-600"
+                  onClick={() => setIsDropdownOpen(false)} 
+                >
+                  My Listings
+                </Link>
+              </div>
+            )}
+          </div>
           <Button onClick={onLogout} variant="danger">
             Logout
           </Button>

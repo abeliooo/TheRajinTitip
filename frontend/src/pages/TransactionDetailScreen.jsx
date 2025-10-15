@@ -77,6 +77,28 @@ const TransactionDetailScreen = () => {
     }
   };
 
+  const handleConfirmReceipt = async () => {
+    if (window.confirm('Are you sure you have received the item?')) {
+      setLoading(true);
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+        await api.put(`/transactions/${transactionId}/complete`, {}, config);
+        alert('Transaction completed successfully!');
+        const { data } = await api.get(`/transactions/${transactionId}`, config);
+        setTransaction(data);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to confirm receipt.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   if (loading) return <p className="text-center text-lg p-8">Loading transaction...</p>;
   if (error) return <p className="text-center text-red-400 p-8">{error}</p>;
   if (!transaction) return null;
@@ -96,54 +118,86 @@ const TransactionDetailScreen = () => {
             <div>
               <h2 className="font-bold text-xl">{product.name}</h2>
               <p className="text-lg text-orange-400 font-semibold">Rp {amount.toLocaleString('id-ID')}</p>
-              <p className="text-sm text-gray-400">Status: {status}</p>
+              <p className="text-sm text-gray-400">Status: <span className="font-semibold">{status}</span></p>
             </div>
           </div>
           
           <div className="border-t border-gray-700 pt-4">
-            <h3 className="font-semibold mb-2">Payment Instructions</h3>
-            <p className="text-sm text-gray-300">
-              Please transfer the exact amount of <span className="font-bold text-orange-400">Rp {amount.toLocaleString('id-ID')}</span> to the following bank account:
-            </p>
-            <div className="bg-gray-900 my-4 p-3 rounded-md">
-              <p className="font-mono">Bank Name: RajinTitip Bank</p>
-              <p className="font-mono">Account Number: 123-456-7890</p>
-              <p className="font-mono">Account Name: PT Rajin Titip Indonesia</p>
-            </div>
-
             {status === 'Waiting for Payment' && (
-              <form onSubmit={submitHandler} className="mt-4">
-                <label htmlFor="paymentProof" className="block text-sm font-medium mb-2">
-                  Upload Payment Screenshot
-                </label>
-                <input
-                  id="paymentProof"
-                  type="file"
-                  onChange={handleFileChange}
-                  required
-                  className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-3xl file:border-0 file:text-sm file:font-semibold file:bg-white file:text-orange-600 hover:file:bg-orange-100"
-                />
-                <p className="text-xs text-gray-500 mt-1 mb-4">
-                  File types allowed: JPG, PNG. Max size: 5MB.
+              <>
+                <h3 className="font-semibold mb-2">Payment Instructions</h3>
+                <p className="text-sm text-gray-300">
+                  Please transfer the exact amount of <span className="font-bold text-orange-400">Rp {amount.toLocaleString('id-ID')}</span> to the following bank account:
                 </p>
+                <div className="bg-gray-900 my-4 p-3 rounded-md">
+                  <p className="font-mono">Bank Name: RajinTitip Bank</p>
+                  <p className="font-mono">Account Number: 123-456-7890</p>
+                  <p className="font-mono">Account Name: PT Rajin Titip Indonesia</p>
+                </div>
+                <form onSubmit={submitHandler} className="mt-4">
+                  <label htmlFor="paymentProof" className="block text-sm font-medium mb-2">
+                    Upload Payment Screenshot
+                  </label>
+                  <input
+                    id="paymentProof"
+                    type="file"
+                    onChange={handleFileChange}
+                    required
+                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-3xl file:border-0 file:text-sm file:font-semibold file:bg-white file:text-orange-600 hover:file:bg-orange-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1 mb-4">
+                    File types allowed: JPG, PNG. Max size: 5MB.
+                  </p>
 
-                {previewSource && (
-                  <div className="my-4">
-                    <img src={previewSource} alt="Preview" className="max-h-60 rounded-lg mx-auto" />
-                  </div>
-                )}
+                  {previewSource && (
+                    <div className="my-4">
+                      <img src={previewSource} alt="Preview" className="max-h-60 rounded-lg mx-auto" />
+                    </div>
+                  )}
 
-                <Button type="submit" fullWidth disabled={loading || !paymentProofFile}>
-                  {loading ? 'Submitting...' : 'Confirm Payment'}
-                </Button>
-              </form>
+                  <Button type="submit" fullWidth disabled={loading || !paymentProofFile}>
+                    {loading ? 'Submitting...' : 'Confirm Payment'}
+                  </Button>
+                </form>
+              </>
             )}
 
-            {status !== 'Waiting for Payment' && (
-              <p className="text-center text-green-400 bg-green-900/50 p-3 rounded-md">
-                You have already submitted payment for this item.
+            {status === 'Waiting for Confirmation' && (
+               <p className="text-center text-blue-400 bg-blue-900/50 p-3 rounded-md">
+                Your payment is being verified by the admin. Please wait.
               </p>
             )}
+
+            {status === 'Processing' && (
+               <p className="text-center text-blue-400 bg-blue-900/50 p-3 rounded-md">
+                Your payment is confirmed. Waiting for the seller to ship the item.
+              </p>
+            )}
+
+            {status === 'Sending' && (
+              <div>
+                <h3 className="font-semibold mb-2">Item is on its way!</h3>
+                <p className="text-sm text-gray-300">The seller has shipped your item. You can track it using the number below:</p>
+                <div className="bg-gray-900 my-4 p-3 rounded-md">
+                  <p className="font-mono text-lg text-orange-400">{transaction.trackingNumber || 'Tracking number not available'}</p>
+                </div>
+                <Button onClick={handleConfirmReceipt} fullWidth disabled={loading}>
+                  {loading ? 'Confirming...' : 'Confirm Item Received'}
+                </Button>
+              </div>
+            )}
+            
+            {status === 'Delivered' && (
+              <p className="text-center text-green-400 bg-green-900/50 p-3 rounded-md">
+                This transaction is complete. Thank you!
+              </p>
+            )}
+            
+            {status === 'Canceled' && (
+              <p className="text-center text-red-400 bg-red-900/50 p-3 rounded-md">
+                This transaction has been canceled by the admin.
+              </p>
+            )}            
           </div>
         </div>
       </div>

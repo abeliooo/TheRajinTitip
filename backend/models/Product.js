@@ -62,6 +62,10 @@ const productSchema = mongoose.Schema(
       default: false,
     },
     bids: [bidSchema], 
+    transaction: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Transaction',
+    },
   },
   {
     timestamps: true,

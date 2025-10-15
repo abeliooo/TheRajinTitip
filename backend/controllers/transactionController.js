@@ -42,7 +42,8 @@ const createTransaction = asyncHandler(async (req, res) => {
   const createdTransaction = await transaction.save();
 
   product.isSold = true;
-  await product.save();
+    product.transaction = createdTransaction._id;
+    await product.save();
 
   res.status(201).json(createdTransaction);
 });
@@ -106,10 +107,69 @@ const updateTransactionToPaid = asyncHandler(async (req, res) => {
   }
 });
 
+
+// @desc    Update transaction to sending (by seller)
+// @route   PUT /api/transactions/:id/ship
+// @access  Private
+const updateTransactionToSending = async (req, res) => {
+  const { trackingNumber } = req.body;
+
+  const transaction = await Transaction.findById(req.params.id).populate({
+    path: 'product',
+    populate: {
+      path: 'user', 
+      select: '_id', 
+    },
+  });
+
+  if (transaction) {
+    if (transaction.product.user._id.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('User not authorized to update this transaction');
+    }
+    
+    transaction.status = 'Sending';
+    transaction.trackingNumber = trackingNumber;
+    transaction.shippedAt = Date.now();
+
+    const updatedTransaction = await transaction.save();
+    res.json(updatedTransaction);
+
+  } else {
+    res.status(404);
+    throw new Error('Transaction not found');
+  }
+};
+
+// @desc    Update transaction to delivered (by buyer)
+// @route   PUT /api/transactions/:id/complete
+// @access  Private
+const updateTransactionToDelivered = async (req, res) => {
+  const transaction = await Transaction.findById(req.params.id);
+
+  if (transaction) {
+    if (transaction.buyer.toString() !== req.user._id.toString()) {
+      res.status(401);
+      throw new Error('User not authorized to complete this transaction');
+    }
+    
+    transaction.status = 'Delivered';
+    transaction.deliveredAt = Date.now();
+
+    const updatedTransaction = await transaction.save();
+    res.json(updatedTransaction);
+  } else {
+    res.status(404);
+    throw new Error('Transaction not found');
+  }
+};
+
 module.exports = {
   createTransaction,
   getMyTransactions,
   getTransactionById,
   updateTransactionToPaid,
+  updateTransactionToSending,
+  updateTransactionToDelivered
 };
 

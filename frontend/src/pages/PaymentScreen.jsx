@@ -32,7 +32,7 @@ const PaymentScreen = () => {
           </div>
           <div className="border-t border-gray-700 pt-4">
             <p className="text-sm text-gray-500">Please transfer to the following account:</p>
-            <p className="text-xl font-semibold">Bank TRT - 123-456-7890</p>
+            <p className="text-xl font-semibold">Bank TRT - 112-233-4455</p>
             <p className="text-md">a/n The Rajin Titip</p>
           </div>
           <div className="border-t border-gray-700 pt-4">
@@ -41,6 +41,9 @@ const PaymentScreen = () => {
             </p>
           </div>
         </div>
+        <Link to={`/transaction/${transaction._id}`} className="mt-6 w-full text-center block bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg">
+            Pay Now
+        </Link>
         <Link to="/home" className="mt-6 w-full text-center block bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
           I'll Pay Later
         </Link>

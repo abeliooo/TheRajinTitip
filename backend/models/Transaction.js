@@ -38,8 +38,14 @@ const transactionSchema = mongoose.Schema(
     paymentProof: {
       type: String, 
     },
-    shippingResi: {
-      type: String, 
+    trackingNumber: {
+      type: String,
+    },
+    shippedAt: {
+      type: Date,
+    },
+    deliveredAt: {
+      type: Date,
     },
   },
   {

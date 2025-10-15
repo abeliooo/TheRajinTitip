@@ -35,8 +35,8 @@ const SellScreen = () => {
         config
       );
 
-      alert('Product successfully listed for auction!');
-      navigate(`/product/${data._id}`);
+      alert('Product successfully submitted and is now awaiting admin approval.');
+      navigate('/my-listings');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create auction.');
     } finally {
