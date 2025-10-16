@@ -8,7 +8,8 @@ const {
   getTransactionById,
   updateTransactionToPaid,
   updateTransactionToSending,
-  updateTransactionToDelivered
+  updateTransactionToDelivered,
+  getMyConversations,
 } = require('../controllers/transactionController.js');
 
 const { protect } = require('../middleware/authMiddleware.js');
@@ -16,6 +17,8 @@ const { protect } = require('../middleware/authMiddleware.js');
 router.route('/').post(protect, createTransaction);
 
 router.route('/my-transactions').get(protect, getMyTransactions);
+
+router.route('/my-conversations').get(protect, getMyConversations);
 
 router.route('/:id').get(protect, getTransactionById);
 

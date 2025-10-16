@@ -103,8 +103,9 @@ const ProductDetail = () => {
           <label htmlFor="bidAmount" className="block text-sm font-medium text-gray-300 mb-2">
             Enter your bid (must be higher than the current price)
           </label>
-          <div className="flex gap-4">
-            <Input 
+          <div className="flex items-center gap-2">
+            <div className="flex-grow">
+              <Input 
               name="bidAmount"
               type="number"
               value={bidAmount}
@@ -112,6 +113,8 @@ const ProductDetail = () => {
               placeholder={`min. Rp ${(product.currentPrice + 1)?.toLocaleString('id-ID')}`}
               required
             />
+            </div>
+            
             <Button type="submit">Bid</Button>
           </div>
         </form>

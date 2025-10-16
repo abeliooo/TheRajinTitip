@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Transaction = require('../models/Transaction.js');
 const Product = require('../models/Product.js');
+const { get } = require('mongoose');
 
 // @desc    Create a new transaction after an auction is won
 // @route   POST /api/transactions
@@ -164,12 +165,28 @@ const updateTransactionToDelivered = async (req, res) => {
   }
 };
 
+// @desc    Get all transactions where the user is buyer or seller
+// @route   GET /api/transactions/my-conversations
+// @access  Private
+const getMyConversations = asyncHandler(async (req, res) => {
+  const transactions = await Transaction.find({
+    $or: [{ buyer: req.user._id }, { seller: req.user._id }],
+  })
+    .populate('product', 'name image')
+    .populate('buyer', 'username')
+    .populate('seller', 'username')
+    .sort({ updatedAt: -1 }); // Urutkan berdasarkan aktivitas terakhir
+
+  res.json(transactions);
+});
+
 module.exports = {
   createTransaction,
   getMyTransactions,
   getTransactionById,
   updateTransactionToPaid,
   updateTransactionToSending,
-  updateTransactionToDelivered
+  updateTransactionToDelivered,
+  getMyConversations,
 };
 

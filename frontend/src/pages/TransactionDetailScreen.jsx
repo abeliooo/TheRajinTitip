@@ -1,38 +1,72 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import Input from '../components/Input';
 import Button from '../components/Button';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const TransactionDetailScreen = () => {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
   const [paymentProofFile, setPaymentProofFile] = useState(null);
   const [previewSource, setPreviewSource] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
 
   const { id: transactionId } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
+  const chatEndRef = useRef(null);
 
   useEffect(() => {
+    const storedUserInfo = JSON.parse(localStorage.getItem('userInfo'));
+    setUserInfo(storedUserInfo);
+
     const fetchTransaction = async () => {
       try {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
+        const config = { headers: { Authorization: `Bearer ${storedUserInfo.token}` } };
         const { data } = await api.get(`/transactions/${transactionId}`, config);
         setTransaction(data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch transaction details.');
+        setError(err.response?.data?.message || 'Failed to fetch details.');
       } finally {
         setLoading(false);
       }
     };
     fetchTransaction();
   }, [transactionId]);
+
+  useEffect(() => {
+    if (transaction && userInfo) { 
+      const fetchMessages = async () => {
+        try {
+          const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+          const { data } = await api.get(`/messages/${transactionId}`, config);
+          setMessages(data);
+        } catch (err) {
+          console.error("Failed to fetch messages:", err);
+        }
+      };
+      fetchMessages();
+
+      socket.emit('join_room', transactionId);
+
+      const messageListener = (message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      };
+      socket.on('receive_message', messageListener);
+
+      return () => {
+        socket.off('receive_message', messageListener);
+      };
+    }
+  }, [transaction, transactionId, userInfo]);
+  
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -56,18 +90,15 @@ const TransactionDetailScreen = () => {
     const formData = new FormData();
     formData.append('paymentProof', paymentProofFile);
 
-    setLoading(true);
-     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    try {
+      setLoading(true);
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${userInfo.token}`,
         },
       };
-      
       await api.put(`/transactions/${transactionId}/pay`, formData, config);
-
       alert('Payment proof submitted successfully!');
       navigate('/history'); 
     } catch (err) {
@@ -79,14 +110,9 @@ const TransactionDetailScreen = () => {
 
   const handleConfirmReceipt = async () => {
     if (window.confirm('Are you sure you have received the item?')) {
-      setLoading(true);
       try {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = {
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        };
+        setLoading(true);
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await api.put(`/transactions/${transactionId}/complete`, {}, config);
         alert('Transaction completed successfully!');
         const { data } = await api.get(`/transactions/${transactionId}`, config);
@@ -99,9 +125,24 @@ const TransactionDetailScreen = () => {
     }
   };
 
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (newMessage.trim() === '' || !userInfo) return;
+
+    const messageData = {
+      transaction: transactionId,
+      sender: userInfo._id,
+      receiver: transaction.buyer._id === userInfo._id ? transaction.seller._id : transaction.buyer._id,
+      content: newMessage,
+    };
+
+    socket.emit('send_message', messageData);
+    setNewMessage('');
+  };
+
   if (loading) return <p className="text-center text-lg p-8">Loading transaction...</p>;
   if (error) return <p className="text-center text-red-400 p-8">{error}</p>;
-  if (!transaction) return null;
+  if (!transaction || !userInfo) return <p className="text-center text-lg p-8">Loading...</p>;
 
   const { product, amount, status } = transaction;
 
@@ -111,10 +152,10 @@ const TransactionDetailScreen = () => {
         <Link to="/history" className="text-orange-400 hover:text-orange-300 mb-6 inline-block">
           &larr; Back 
         </Link>
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <h1 className="text-2xl font-bold mb-4">Transaction Details</h1>
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
+           <h1 className="text-2xl font-bold mb-4">Transaction Details</h1>
           <div className="flex items-center gap-4 mb-6">
-            <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+            <img src={`http://localhost:5000${product.image}`} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
             <div>
               <h2 className="font-bold text-xl">{product.name}</h2>
               <p className="text-lg text-orange-400 font-semibold">Rp {amount.toLocaleString('id-ID')}</p>
@@ -199,6 +240,40 @@ const TransactionDetailScreen = () => {
               </p>
             )}            
           </div>
+        </div>
+
+        <div className="bg-gray-800 rounded-lg border border-gray-700">
+          <h2 className="text-xl font-bold p-4 border-b border-gray-700">Chat with {transaction.buyer._id === userInfo._id ? transaction.seller.username : transaction.buyer.username}</h2>
+          
+          <div className="p-4 h-80 overflow-y-auto flex flex-col gap-3">
+            {messages.map((msg) => (
+              <div
+                key={msg._id}
+                className={`max-w-xs p-3 rounded-lg ${
+                  msg.sender._id === userInfo._id
+                    ? 'bg-orange-600 self-end'
+                    : 'bg-gray-600 self-start'
+                }`}
+              >
+                <p className="text-sm">{msg.content}</p>
+                <p className="text-xs text-gray-300 mt-1 text-right">
+                  {new Date(msg.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 flex gap-3">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="w-full px-4 py-2 text-white bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <Button type="submit">Send</Button>
+          </form>
         </div>
       </div>
     </div>

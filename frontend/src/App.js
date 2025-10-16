@@ -12,6 +12,9 @@ import TransactionDetailScreen from './pages/TransactionDetailScreen';
 import AdminRoute from './components/AdminRoutes';
 import AdminLoginScreen from './pages/admin/AdminLoginScreen';
 import MyListingsScreen from './pages/MyListingsScreen';
+import ProfileScreen from './pages/ProfileScreen';
+import ChatScreen from './pages/ChatScreen';
+import MainLayout from './components/MainLayout';
 
 function App() {
   const [userInfo, setUserInfo] = useState(null);
@@ -48,37 +51,34 @@ function App() {
       <Routes>
         <Route path="/login" element={userInfo ? <Navigate to="/home" /> : <LoginScreen setUserInfo={setUserInfo} />} />
         <Route path="/register" element={userInfo ? <Navigate to="/home" /> : <RegisterScreen />} />
-        <Route path="/home" element={userInfo ? <HomeScreen userInfo={userInfo} onLogout={handleLogout} /> : <Navigate to="/login" />} />
         
-        <Route 
-          path="/product/:id" 
-          element={userInfo ? <ProductDetail /> : <Navigate to="/login" />} 
-        />
-        <Route 
-          path="/sell" 
-          element={userInfo ? <SellScreen /> : <Navigate to="/login" />} 
-        />
-        <Route 
-          path="/payment" 
-          element={userInfo ? <PaymentScreen /> : <Navigate to="/login" />} 
-        /> 
-        <Route 
-          path="/history" 
-          element={userInfo ? <TransactionHistoryScreen /> : <Navigate to="/login" />} 
-        /> 
-        <Route 
-          path="/transaction/:id" 
-          element={userInfo ? <TransactionDetailScreen /> : <Navigate to="/login" />} 
-        /> 
-        <Route 
-          path="/my-listings" 
-          element={userInfo ? <MyListingsScreen /> : <Navigate to="/login" />} 
-        />
+        {userInfo && (
+          <Route 
+            path="/*" 
+            element={
+              <MainLayout userInfo={userInfo} onLogout={handleLogout}>
+                <Routes>
+                  <Route path="/home" element={<HomeScreen userInfo={userInfo} onLogout={handleLogout} />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/sell" element={<SellScreen />} />
+                  <Route path="/payment" element={<PaymentScreen />} />
+                  <Route path="/history" element={<TransactionHistoryScreen />} />
+                  <Route path="/transaction/:id" element={<TransactionDetailScreen />} />
+                  <Route path="/my-listings" element={<MyListingsScreen />} />
+                  <Route path="/profile" element={<ProfileScreen />} />
+                  <Route path="/chat" element={<ChatScreen />} />
+                  <Route path="/chat/:id" element={<ChatScreen />} />
+                  <Route path="/" element={<Navigate to="/home" />} />
+                </Routes>
+              </MainLayout>
+            } 
+          />
+        )}
 
         <Route path="/admin/login" element={<AdminLoginScreen />} />
         <Route path="/admin/*" element={<AdminRoute onLogout={handleLogout} />} />
         
-        <Route path="/" element={<Navigate to={userInfo ? "/home" : "/login"} />} />
+        {!userInfo && <Route path="/*" element={<Navigate to="/login" />} />}
       </Routes>
     </Router>
   );

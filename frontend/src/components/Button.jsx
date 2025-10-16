@@ -5,14 +5,12 @@ const Button = ({
   onClick,
   disabled = false,
   children,
-  variant = 'primary', // 'primary', 'danger', etc.
+  variant = 'primary', 
   fullWidth = false,
   className = '',
 }) => {
-  // Base styles
   let baseStyles = "px-4 py-2 font-semibold text-white rounded-lg transition-colors duration-300 disabled:cursor-not-allowed";
 
-  // Variant styles
   let variantStyles = '';
   if (variant === 'primary') {
     variantStyles = "bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800";
@@ -20,7 +18,6 @@ const Button = ({
     variantStyles = "bg-red-600 hover:bg-red-700 disabled:bg-red-800";
   }
 
-  // Width styles
   const widthStyles = fullWidth ? 'w-full' : '';
 
   return (

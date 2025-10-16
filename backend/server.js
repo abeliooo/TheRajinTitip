@@ -10,6 +10,8 @@ const { notFound, errorHandler } = require('./middleware/errorMiddleware.js');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const Message = require('./models/Message');
+const messageRoutes = require('./routes/messageRoutes.js');
 
 dotenv.config();
 
@@ -43,15 +45,41 @@ app.use('/api/products', productRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use('/messages', express.static(path.join(__dirname, '/messages')));
+app.use('/api/messages', messageRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
 io.on('connection', (socket) => {
-  console.log('Someone is  connected via WebSocket:', socket.id);
+  console.log('A user connected via WebSocket:', socket.id);
+
+  socket.on('join_room', (transactionId) => {
+    socket.join(transactionId);
+    console.log(`User ${socket.id} joined room: ${transactionId}`);
+  });
+
+  socket.on('send_message', async (data) => {
+    try {
+      const newMessage = new Message({
+        transaction: data.transaction,
+        sender: data.sender,
+        receiver: data.receiver,
+        content: data.content,
+      });
+      
+      let savedMessage = await newMessage.save();
+      savedMessage = await savedMessage.populate('sender', 'username');
+
+      io.to(data.transaction).emit('receive_message', savedMessage);
+      
+    } catch (error) {
+      console.error('Error saving or sending message:', error);
+    }
+  });
 
   socket.on('disconnect', () => {
-    console.log('Someone is disconnected:', socket.id);
+    console.log('A user disconnected:', socket.id);
   });
 });
 
