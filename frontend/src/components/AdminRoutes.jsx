@@ -5,6 +5,8 @@ import AdminRoute from './AdminRoute';
 import AdminDashboardScreen from '../pages/admin/AdminDashboard';
 import ProductApprovalScreen from '../pages/admin/ProductApprovalScreen';
 import ProductManagementScreen from '../pages/admin/ProductManagementScreen';
+import AdminComplaintsScreen from '../pages/admin/AdminComplaintScreen';
+import AdminComplaintDetailScreen from '../pages/admin/AdminComplaintDetailScreen';
 
 const AdminRoutes = ({ onLogout }) => {
   return (
@@ -27,7 +29,27 @@ const AdminRoutes = ({ onLogout }) => {
       />
       <Route
         path="products"
-        element={<AdminRoute><ProductManagementScreen /></AdminRoute>}
+        element={
+          <AdminRoute>
+            <ProductManagementScreen />
+          </AdminRoute>
+        }
+      />
+      <Route 
+        path="complaints" 
+        element={
+          <AdminRoute>
+            <AdminComplaintsScreen onLogout={onLogout} />
+          </AdminRoute>
+        }
+      />
+      <Route 
+      path="complaints/:id" 
+      element={
+        <AdminRoute>
+          <AdminComplaintDetailScreen onLogout={onLogout} />
+        </AdminRoute>
+      }
       />
     </Routes>
   );

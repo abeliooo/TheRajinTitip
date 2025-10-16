@@ -81,6 +81,9 @@ const AdminDashboardScreen = ({ onLogout }) => {
           <Link to="/admin/products" className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
             Active Products
           </Link>
+          <Link to="/admin/complaints" className="bg-red-800 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+            Complaint Center
+          </Link>
         </div>
 
         <h2 className="text-2xl font-semibold mb-4">Pending Transactions</h2>

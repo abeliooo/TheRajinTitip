@@ -17,7 +17,7 @@ const getPendingTransactions = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/transactions/:id/verify
 // @access  Private/Admin
 const verifyTransaction = asyncHandler(async (req, res) => {
-  const { action } = req.body; // approve or reject
+  const { action } = req.body; 
 
   const transaction = await Transaction.findById(req.params.id);
 
@@ -26,7 +26,6 @@ const verifyTransaction = asyncHandler(async (req, res) => {
       transaction.status = 'Processing'; 
     } else if (action === 'reject') {
       transaction.status = 'Canceled';
-      // Di sini Anda bisa menambahkan logika untuk mengembalikan dana atau lainnya
     } else {
       res.status(400);
       throw new Error("Invalid action. Must be 'approve' or 'reject'.");
@@ -54,7 +53,7 @@ const getPendingProducts = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/products/:id/review
 // @access  Private/Admin
 const reviewProduct = asyncHandler(async (req, res) => {
-  const { action } = req.body; // action: 'approve' atau 'reject'
+  const { action } = req.body; 
 
   const product = await Product.findById(req.params.id);
 
@@ -102,11 +101,68 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get all transactions with a complaint status
+// @route   GET /api/admin/complaints
+// @access  Private/Admin
+const getComplaints = asyncHandler(async (req, res) => {
+  const complaints = await Transaction.find({ status: 'Complaint' })
+    .populate('product', 'name')
+    .populate('buyer', 'username')
+    .populate('seller', 'username');
+  
+  res.json(complaints);
+});
+
+// @desc    Get transaction by ID for admin review
+// @route   GET /api/admin/transactions/:id
+// @access  Private/Admin
+const getComplaintTransactionById = asyncHandler(async (req, res) => {
+  const transaction = await Transaction.findById(req.params.id)
+    .populate('product', 'name')
+    .populate('buyer', 'username email')
+    .populate('seller', 'username email');
+    
+  if (transaction) {
+    res.json(transaction);
+  } else {
+    res.status(404);
+    throw new Error('Transaction not found');
+  }
+});
+
+// @desc    Resolve a complaint
+// @route   PUT /api/admin/complaints/:id/resolve
+// @access  Private/Admin
+const resolveComplaint = asyncHandler(async (req, res) => {
+  const { action } = req.body;
+  const transaction = await Transaction.findById(req.params.id);
+
+  if (transaction && transaction.status === 'Complaint') {
+    if (action === 'approve') {
+      transaction.status = 'Canceled'; 
+    } else if (action === 'reject') {
+      transaction.status = 'Completed';
+    } else {
+      res.status(400);
+      throw new Error("Invalid action. Must be 'approve' or 'reject'.");
+    }
+
+    const updatedTransaction = await transaction.save();
+    res.json(updatedTransaction);
+  } else {
+    res.status(404);
+    throw new Error('Complaint transaction not found');
+  }
+});
+
 module.exports = {
   getPendingTransactions,
   verifyTransaction,
   getPendingProducts,
   reviewProduct,
   getActiveProducts,
-  deleteProduct
+  deleteProduct,
+  getComplaints,
+  getComplaintTransactionById,
+  resolveComplaint,
 };

@@ -12,7 +12,6 @@ const Input = ({
 }) => {
   return (
     <div>
-      {/* Tampilkan label jika ada */}
       {label && (
         <label htmlFor={name} className="block text-sm font-medium text-gray-300 mb-1">
           {label}

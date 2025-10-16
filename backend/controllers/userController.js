@@ -55,7 +55,6 @@ const loginUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    // Pesan error dalam Bahasa Inggris
     throw new Error('Invalid email or password');
   }
 });

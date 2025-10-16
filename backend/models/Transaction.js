@@ -32,6 +32,7 @@ const transactionSchema = mongoose.Schema(
         'Delivered',
         'Canceled',
         'Complaint',
+        'Completed',
       ],
       default: 'Waiting for Payment',
     },
@@ -46,6 +47,11 @@ const transactionSchema = mongoose.Schema(
     },
     deliveredAt: {
       type: Date,
+    },
+    complaintDetails: { 
+      reason: { type: String },
+      videoUrl: { type: String }, 
+      filedAt: { type: Date },
     },
   },
   {

@@ -69,7 +69,7 @@ const MyListingsScreen = () => {
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         <Link to="/home" className="text-orange-400 hover:text-orange-300 mb-6 inline-block">
-          &larr; Back to Home
+          &larr; Back
         </Link>
         <h1 className="text-3xl font-bold mb-6 border-b-2 border-gray-700 pb-2">My Items for Sale</h1>
         

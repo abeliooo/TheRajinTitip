@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/uploadMiddleware');
+const uploadVideo = require('../middleware/videoUploadMiddleware.js');
 
 const {
   createTransaction,
@@ -10,6 +11,7 @@ const {
   updateTransactionToSending,
   updateTransactionToDelivered,
   getMyConversations,
+  fileComplaint,
 } = require('../controllers/transactionController.js');
 
 const { protect } = require('../middleware/authMiddleware.js');
@@ -19,6 +21,8 @@ router.route('/').post(protect, createTransaction);
 router.route('/my-transactions').get(protect, getMyTransactions);
 
 router.route('/my-conversations').get(protect, getMyConversations);
+
+router.route('/:id/complain').post(protect, uploadVideo.single('complaintVideo'), fileComplaint);
 
 router.route('/:id').get(protect, getTransactionById);
 

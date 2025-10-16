@@ -175,9 +175,42 @@ const getMyConversations = asyncHandler(async (req, res) => {
     .populate('product', 'name image')
     .populate('buyer', 'username')
     .populate('seller', 'username')
-    .sort({ updatedAt: -1 }); // Urutkan berdasarkan aktivitas terakhir
+    .sort({ updatedAt: -1 }); 
 
   res.json(transactions);
+});
+
+// @desc    File a complaint for a transaction
+// @route   POST /api/transactions/:id/complain
+// @access  Private (Buyer only)
+const fileComplaint = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+  const transaction = await Transaction.findById(req.params.id);
+
+  if (!transaction) {
+    res.status(404);
+    throw new Error('Transaction not found');
+  }
+
+  if (transaction.buyer.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized to file a complaint for this transaction');
+  }
+
+  if (!req.file) {
+    res.status(400);
+    throw new Error('Complaint video proof is required.');
+  }
+
+  transaction.status = 'Complaint';
+  transaction.complaintDetails = {
+    reason: reason,
+    videoUrl: req.file.path.replace(/\\/g, "/"),
+    filedAt: Date.now(),
+  };
+
+  const updatedTransaction = await transaction.save();
+  res.json(updatedTransaction);
 });
 
 module.exports = {
@@ -188,5 +221,6 @@ module.exports = {
   updateTransactionToSending,
   updateTransactionToDelivered,
   getMyConversations,
+  fileComplaint,
 };
 

@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Enkripsi password sebelum disimpan
+// Enkripsi password 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
