@@ -13,5 +13,4 @@ router.route('/my-products').get(protect, getMyProducts);
 router.route('/:id').get(getProductById);
 router.route('/:id/bids').post(protect, placeBid);
 
-
 module.exports = router;

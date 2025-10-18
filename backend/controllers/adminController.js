@@ -1,6 +1,7 @@
 const Product = require('../models/Product.js');
 const asyncHandler = require('express-async-handler');
 const Transaction = require('../models/Transaction.js');
+const User = require('../models/User.js');
 
 // @desc    Get all transactions awaiting confirmation
 // @route   GET /api/admin/transactions/pending
@@ -91,10 +92,20 @@ const getActiveProducts = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
+  const { reason } = req.body;
+
+  if (!reason) {
+    res.status(400);
+    throw new Error('Removal reason is required');
+  }
+
 
   if (product) {
-    await Product.deleteOne({ _id: product._id });
-    res.json({ message: 'Product removed' });
+    product.status = 'removed';
+    product.removalReason = reason;
+
+    const updatedProduct = await product.save();
+    res.json({ message: 'Product has been removed', product: updatedProduct });
   } else {
     res.status(404);
     throw new Error('Product not found');
@@ -155,6 +166,30 @@ const resolveComplaint = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get all users
+// @route   GET /api/admin/users
+// @access  Private/Admin
+const getUsers = asyncHandler(async (req, res) => {
+  const users = await User.find({}).select('-password');
+  res.json(users);
+});
+
+// @desc    Get all resolved (completed or canceled) complaints
+// @route   GET /api/admin/complaints/history
+// @access  Private/Admin
+const getResolvedComplaints = asyncHandler(async (req, res) => {
+  const resolvedComplaints = await Transaction.find({
+    status: { $in: ['Canceled', 'Completed'] },
+    complaintDetails: { $exists: true, $ne: null } 
+  })
+    .populate('product', 'name')
+    .populate('buyer', 'username')
+    .populate('seller', 'username')
+    .sort({ updatedAt: -1 });
+  
+  res.json(resolvedComplaints);
+});
+
 module.exports = {
   getPendingTransactions,
   verifyTransaction,
@@ -165,4 +200,6 @@ module.exports = {
   getComplaints,
   getComplaintTransactionById,
   resolveComplaint,
+  getUsers,
+  getResolvedComplaints,
 };

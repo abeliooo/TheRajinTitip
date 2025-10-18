@@ -151,9 +151,9 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <Link to="/home" className="mb-8 inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
-        &larr; Back
+    <main className="p-8">
+      <Link to="/home" className="mb-8 inline-block text-orange-400 hover:text-orange-300">
+        &larr; Back 
       </Link>
 
       {loading ? <p>Loading...</p> : error ? <p className="text-red-400">{error}</p> : (
@@ -194,7 +194,7 @@ const ProductDetail = () => {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

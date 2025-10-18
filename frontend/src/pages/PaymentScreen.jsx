@@ -18,7 +18,7 @@ const PaymentScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center p-4">
+    <main className="p-8 flex justify-center items-center">
       <div className="w-full max-w-2xl bg-gray-800 p-8 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold mb-2 text-center text-green-400">Payment</h1>
         <p className="text-center text-gray-400 mb-6">Complete your payment to continue.</p>
@@ -48,7 +48,7 @@ const PaymentScreen = () => {
           I'll Pay Later
         </Link>
       </div>
-    </div>
+    </main>
   );
 };
 

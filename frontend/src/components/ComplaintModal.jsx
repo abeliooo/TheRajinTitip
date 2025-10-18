@@ -79,7 +79,7 @@ const ComplaintModal = ({ isOpen, onClose, transactionId }) => {
             </Button>
             
             <Button type="submit" disabled={loading} variant="danger">
-              {loading ? 'Submitting...' : 'Submit Complaint'}
+              {loading ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
         </form>

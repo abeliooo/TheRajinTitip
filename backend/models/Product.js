@@ -53,8 +53,12 @@ const productSchema = mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ['pending', 'approved', 'rejected'],
+      enum: ['pending', 'approved', 'rejected', 'active', 'sold', 'finished', 'removed'],
       default: 'pending',
+    },
+    removalReason: {
+      type: String,
+      trim: true, 
     },
     isSold: {
       type: Boolean,

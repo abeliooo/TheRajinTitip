@@ -8,11 +8,10 @@ const AdminComplaintsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = {
           headers: {
             Authorization: `Bearer ${userInfo.token}`,
@@ -27,26 +26,23 @@ const AdminComplaintsScreen = () => {
       }
     };
 
-    if (userInfo && userInfo.isAdmin) {
-      fetchComplaints();
-    }
-  }, [userInfo]);
+    fetchComplaints();
+  }, []);
   
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto">
-        <Link to="/admin/dashboard" className="mb-8 inline-block bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">
-            &larr; Back
+ return (
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Active Complaints</h2>
+        <Link to="/admin/complaints/history">
+          <Button>View History</Button>
         </Link>
-        <h2 className="text-2xl font-semibold mb-4">Complaint Management</h2>
-
-        {loading ? (
-          <p>Loading complaints...</p>
-        ) : error ? (
-          <p className="text-red-400">{error}</p>
-        ) : (
-          <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
+      </div>
+      {loading ? (
+        <p>Loading complaints...</p>
+      ) : error ? (
+        <p className="text-red-400">{error}</p>
+      ) : (
+        <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
             {complaints.length > 0 ? (
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="bg-gray-900">
@@ -69,8 +65,8 @@ const AdminComplaintsScreen = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Link to={`/admin/complaints/${tx._id}`}>
-                            <Button className="bg-red-700 hover:bg-red-600 text-xs">
-                            Review Details
+                            <Button className="bg-blue-600 hover:bg-blue-700 text-xs">
+                              Review Details
                             </Button>
                         </Link>
                       </td>
@@ -84,7 +80,6 @@ const AdminComplaintsScreen = () => {
           </div>
         )}
       </div>
-    </div>
   );
 };
 

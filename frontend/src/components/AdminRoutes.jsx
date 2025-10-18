@@ -1,58 +1,31 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import AdminRoute from './AdminRoute'; 
+import AdminLayout from '../pages/admin/AdminLayout'; 
 import AdminDashboardScreen from '../pages/admin/AdminDashboard';
-import ProductApprovalScreen from '../pages/admin/ProductApprovalScreen';
-import ProductManagementScreen from '../pages/admin/ProductManagementScreen';
+import AdminProductApprovalScreen from '../pages/admin/ProductApprovalScreen';
+import AdminActiveProductsScreen from '../pages/admin/ProductManagementScreen';
 import AdminComplaintsScreen from '../pages/admin/AdminComplaintScreen';
 import AdminComplaintDetailScreen from '../pages/admin/AdminComplaintDetailScreen';
+import AdminUserListScreen from '../pages/admin/AdminUserListScreen';
+import AdminComplaintHistoryScreen from '../pages/admin/AdminComplaintHistoryScreen';
 
-const AdminRoutes = ({ onLogout }) => {
+const AdminRoute = ({ onLogout }) => {
   return (
-    <Routes>
-      <Route
-        path="dashboard" 
-        element={
-          <AdminRoute> 
-            <AdminDashboardScreen onLogout={onLogout} />
-          </AdminRoute>
-        } 
-      />
-      <Route
-        path="approvals" 
-        element={
-          <AdminRoute> 
-            <ProductApprovalScreen />
-          </AdminRoute>
-        } 
-      />
-      <Route
-        path="products"
-        element={
-          <AdminRoute>
-            <ProductManagementScreen />
-          </AdminRoute>
-        }
-      />
-      <Route 
-        path="complaints" 
-        element={
-          <AdminRoute>
-            <AdminComplaintsScreen onLogout={onLogout} />
-          </AdminRoute>
-        }
-      />
-      <Route 
-      path="complaints/:id" 
-      element={
-        <AdminRoute>
-          <AdminComplaintDetailScreen onLogout={onLogout} />
-        </AdminRoute>
-      }
-      />
-    </Routes>
+    <AdminLayout onLogout={onLogout}>
+      <Routes>
+        <Route path="dashboard" element={<AdminDashboardScreen />} />
+        <Route path="approvals" element={<AdminProductApprovalScreen />} />
+        <Route path="products" element={<AdminActiveProductsScreen />} />
+        <Route path="complaints" element={<AdminComplaintsScreen />} />
+        <Route path="complaints/history" element={<AdminComplaintHistoryScreen />} /> {/* TAMBAHKAN BARIS INI */}
+        <Route path="complaints/:id" element={<AdminComplaintDetailScreen />} />
+        <Route path="users" element={<AdminUserListScreen />} />
+        
+        <Route path="/" element={<Navigate to="dashboard" />} />
+      </Routes>
+    </AdminLayout>
   );
 };
 
-export default AdminRoutes;
+export default AdminRoute;

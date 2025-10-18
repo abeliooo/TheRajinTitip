@@ -66,17 +66,18 @@ const MyListingsScreen = () => {
   if (error) return <p className="text-center text-red-400 p-8">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
+    <main className="p-8">
       <div className="max-w-4xl mx-auto">
         <Link to="/home" className="text-orange-400 hover:text-orange-300 mb-6 inline-block">
-          &larr; Back
+          &larr; Back 
         </Link>
         <h1 className="text-3xl font-bold mb-6 border-b-2 border-gray-700 pb-2">My Items for Sale</h1>
-        
         <div className="space-y-4">
           {products.length > 0 ? (
             products.map((product) => (
-              <div key={product._id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div key={product._id} 
+                className={`bg-gray-800 rounded-lg p-4 border border-gray-700 ${product.status === 'removed' ? 'opacity-60' : ''}`}
+              >
                 <div className="flex items-center gap-4">
                   <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-20 h-20 object-cover rounded-md" />
                   <div className="flex-grow">
@@ -85,12 +86,19 @@ const MyListingsScreen = () => {
                       Status: <span className="font-semibold text-orange-400">{product.status}</span>
                     </p>
                     {product.transaction && (
-                       <p className="text-xs text-yellow-400 mt-1">Transaction Status: {product.transaction.status}</p>
+                      <p className="text-xs text-yellow-400 mt-1">Transaction Status: {product.transaction.status}</p>
                     )}
                   </div>
                 </div>
 
-                {product.transaction?.status === 'Processing' && (
+                {product.status === 'removed' ? (
+                  <div className="border-t border-gray-700 mt-4 pt-4 bg-red-900 bg-opacity-30 p-3 rounded-md">
+                    <h3 className="font-bold text-red-400">This item was removed by an Admin.</h3>
+                    <p className="text-sm text-gray-300 mt-1">
+                      <strong>Reason:</strong> {product.removalReason}
+                    </p>
+                  </div>
+                ) : product.transaction?.status === 'Processing' ? (
                   <div className="border-t border-gray-700 mt-4 pt-4">  
                     <p className="text-sm text-green-400 mb-2">Payment confirmed! Please ship the item.</p>
                     <div className="flex gap-4">
@@ -105,7 +113,7 @@ const MyListingsScreen = () => {
                       </Button>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             ))
           ) : (
@@ -113,7 +121,7 @@ const MyListingsScreen = () => {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

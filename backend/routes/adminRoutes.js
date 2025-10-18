@@ -10,6 +10,8 @@ const {
     getComplaints,
     getComplaintTransactionById,
     resolveComplaint,
+    getUsers,
+    getResolvedComplaints
 } = require('../controllers/adminController.js');
 
 const { protect, admin } = require('../middleware/authMiddleware.js');
@@ -26,5 +28,9 @@ router.route('/products/:id').delete(protect, admin, deleteProduct);
 
 router.route('/complaints').get(protect, admin, getComplaints);
 router.route('/complaints/:id/resolve').put(protect, admin, resolveComplaint);
+router.route('/complaints/history').get(protect, admin, getResolvedComplaints);
+router.route('/complaints/:id/resolve').put(protect, admin, resolveComplaint);
+
+router.route('/users').get(protect, admin, getUsers);
 
 module.exports = router;

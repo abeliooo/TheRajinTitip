@@ -45,9 +45,9 @@ const SellScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 flex justify-center items-center">
+    <div className="p-8 flex justify-center items-center">
       <div className="w-full max-w-2xl bg-gray-800 p-8 rounded-lg shadow-lg">
-        <Link to="/home" className="text-orange-400 hover:text-orange-300 mb-4 inline-block">
+        <Link to="/home" className="text-orange-400 hover:text-orange-300 mb-6 inline-block">
           &larr; Back 
         </Link>
         <h1 className="text-3xl font-bold mb-6 text-center text-orange-400">Titip Your Item</h1>

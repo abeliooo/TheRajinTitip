@@ -91,7 +91,7 @@ const placeBid = asyncHandler(async (req, res) => {
 // @desc    Fetch all products for the logged in user
 /// @route   GET /api/products/my-products
 // @access  Private
-const getMyProducts = async (req, res) => {
+const getMyProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({ user: req.user._id }).populate({
     path: 'transaction',
     select: 'status' 
@@ -103,6 +103,6 @@ const getMyProducts = async (req, res) => {
     res.status(404);
     throw new Error('No products found for this user.');
   }
-};
+});
 
 module.exports = { getProducts, getProductById, createProduct, placeBid, getMyProducts };

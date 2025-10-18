@@ -151,7 +151,7 @@ const TransactionDetailScreen = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
+      <main className="p-8">
         <div className="max-w-2xl mx-auto">
           <Link to="/history" className="text-orange-400 hover:text-orange-300 mb-6 inline-block">
             &larr; Back 
@@ -159,7 +159,7 @@ const TransactionDetailScreen = () => {
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
             <h1 className="text-2xl font-bold mb-4">Transaction Details</h1>
             <div className="flex items-center gap-4 mb-6">
-              <img src={`http://localhost:5000${product.image}`} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+          <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
               <div>
                 <h2 className="font-bold text-xl">{product.name}</h2>
                 <p className="text-lg text-orange-400 font-semibold">Rp {amount.toLocaleString('id-ID')}</p>
@@ -289,7 +289,7 @@ const TransactionDetailScreen = () => {
               </div>
             )}
         </div>
-      </div>
+      </main>
       <ComplaintModal
         isOpen={isComplaintModalOpen}
         onClose={() => setIsComplaintModalOpen(false)}

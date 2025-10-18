@@ -112,7 +112,7 @@ const updateTransactionToPaid = asyncHandler(async (req, res) => {
 // @desc    Update transaction to sending (by seller)
 // @route   PUT /api/transactions/:id/ship
 // @access  Private
-const updateTransactionToSending = async (req, res) => {
+const updateTransactionToSending = asyncHandler(async (req, res) => {
   const { trackingNumber } = req.body;
 
   const transaction = await Transaction.findById(req.params.id).populate({
@@ -124,7 +124,7 @@ const updateTransactionToSending = async (req, res) => {
   });
 
   if (transaction) {
-    if (transaction.product.user._id.toString() !== req.user._id.toString()) {
+    if (transaction.seller.toString() !== req.user._id.toString()) {
       res.status(401);
       throw new Error('User not authorized to update this transaction');
     }
@@ -140,12 +140,12 @@ const updateTransactionToSending = async (req, res) => {
     res.status(404);
     throw new Error('Transaction not found');
   }
-};
+});
 
 // @desc    Update transaction to delivered (by buyer)
 // @route   PUT /api/transactions/:id/complete
 // @access  Private
-const updateTransactionToDelivered = async (req, res) => {
+const updateTransactionToDelivered = asyncHandler(async (req, res) => {
   const transaction = await Transaction.findById(req.params.id);
 
   if (transaction) {
@@ -163,7 +163,7 @@ const updateTransactionToDelivered = async (req, res) => {
     res.status(404);
     throw new Error('Transaction not found');
   }
-};
+});
 
 // @desc    Get all transactions where the user is buyer or seller
 // @route   GET /api/transactions/my-conversations
