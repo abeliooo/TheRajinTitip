@@ -8,73 +8,72 @@ Inspired by @thelazytitip @thelazymonday
 
 ## 🚀 Tech Stack
 
-| Category      | Technology                                        |
-| :------------ | :----------------------------------------------- |
+| Category | Technology |
+| :--- | :--- |
 | **Frontend** | React.js, React Router, Axios, Socket.IO Client, Tailwind CSS |
-| **Backend** | Node.js, Express.js, Socket.IO                   |
-| **Database** | MongoDB (with Mongoose), MongoDB Atlas (Cloud)   |
-| **Authentication** | JSON Web Tokens (JWT), bcryptjs                 |
+| **Backend** | Node.js, Express.js, Socket.IO |
+| **Database** | MongoDB (with Mongoose), MongoDB Atlas (Cloud) |
+| **Authentication** | JSON Web Tokens (JWT), bcryptjs |
 
 ---
 
 ## ✨ Key Features
 
--   **Real-Time Auctions:** Prices, time, and the highest bidder are updated instantly without needing to refresh the page.
--   **Admin Moderation:** All products to be auctioned must go through an admin approval process to maintain quality and security.
--   **Secure Transaction Flow:** Uses an escrow-like system where payment is held until the transaction is completed.
--   **Admin Dashboard:** A dedicated interface for admins to verify transactions, approve products, and manage the platform.
--   **Separated Logins:** A distinct login flow for regular users and admins.
+-   **Real-Time Auctions:** Prices, time, and the highest bidder are updated instantly across all clients using WebSockets.
+-   **Admin Moderation:** All products must go through an admin approval process to maintain quality and security.
+-   **Secure Transaction Flow:** Implements an escrow-like system where payment is held by the platform and only released to the seller after the buyer confirms receipt of the item or a dispute is resolved.
+-   **Real-Time Communication:** A built-in, private chat system for buyers and sellers to coordinate during transactions, with a centralized chat screen to manage all conversations.
+-   **Dispute Resolution:** A formal complaint system where buyers can submit evidence (including video) for review. Admins act as mediators to resolve disputes fairly.
+-   **Comprehensive Admin Dashboard:** A dedicated interface for admins to verify payments, approve products, resolve complaints, and manage users.
+-   **Separated Logins:** A distinct and secure login flow for regular users and administrators.
 
 ---
 
 ## 📦 Module Breakdown
 
-Below is a detailed breakdown of each module within this project.
-
 ### Module A: User Management & Authentication
 *Goal: To manage all aspects related to user identity, registration, and access.*
--   **User Registration:** A registration form for new users (`username`, `fullName`, `email`, `phoneNumber`, `address`, `password`, `accountNumber`).
+-   **User Registration:** A form for new users to create an account (`username`, `fullName`, `email`, `phoneNumber`, `address`, `password`, `accountNumber`).
 -   **Login & Logout:** A secure authentication system based on JWT.
 -   **Separated Logins:** Regular users log in at `/login`, while admins log in at `/admin/login`.
--   **Profile Management:** A page for users to edit their personal data.
+-   **Profile Management:** A page for users to edit their personal data, requiring current password confirmation for changes.
 
 ### Module B: Auction & Bidding System
 *Goal: To manage the lifecycle of an auction, from creation to determining the winner.*
--   **Admin Approval Flow:** Items submitted by sellers will have a `pending` status and will not go live until approved by an Admin.
--   **Real-Time Bidding Functionality:** Users can place bids, and all changes are broadcast to all clients instantly using WebSockets.
--   **End of Auction:** Automatic winner determination when the time runs out.
--   **Bid Validation:** Sellers cannot bid on their own products.
+-   **Admin Approval Flow:** Items submitted by sellers are held with a `pending` status and will not go live until approved by an admin.
+-   **Real-Time Bidding:** Users can place bids, and all changes (price, bidder) are broadcast to all clients instantly using WebSockets.
+-   **End of Auction:** The system automatically determines the winner when the auction timer runs out.
+-   **Bid Validation:** Sellers are prevented from bidding on their own products.
 
 ### Module C: Transaction & Payment Flow
-*Goal: To manage the process from when an auction is won until the payment is complete.*
--   **Payment Initiation:** The winner creates a transaction after the auction ends (status: `Waiting for Payment`).
--   **Upload Proof of Payment:** The buyer uploads proof of transfer (status: `Waiting for Confirmation`).
--   **Admin Verification:** The admin approves (`Processing`) or rejects (`Canceled`) the proof of payment.
--   **Enter Tracking Number:** A feature for the seller to input the shipping tracking number (status: `Sending`).
--   **Transaction Completion:** A feature for the buyer to confirm receipt of the item, triggering the release of funds (status: `Delivered`).
+*Goal: To manage the process from when an auction is won until the payment is complete and funds are released.*
+-   **Payment Initiation:** The auction winner creates a transaction, which starts in a `Waiting for Payment` status.
+-   **Upload Proof of Payment:** The buyer uploads a file (e.g., a screenshot) as proof of transfer.
+-   **Admin Verification:** An admin reviews the proof and either approves the payment (`Processing`) or rejects it (`Canceled`).
+-   **Shipping:** The seller enters a shipping tracking number, changing the status to `Sending`.
+-   **Transaction Completion:** The buyer confirms receipt of the item. If there are no complaints, the transaction is marked `Completed`, and funds are released to the seller.
 
 ### Module D: Communication & Complaints
-*Goal: To provide a means of communication between users and a system for handling disputes.*
--   **Transactional Chat:** A private chat system between the buyer and seller.
--   **Complaint System:** A feature for buyers to file a complaint.
+*Goal: To provide a means of communication and a system for handling disputes.*
+-   **Transactional Chat:** A private, real-time chat between the buyer and seller for each transaction, accessible from the transaction detail page.
+-   **Centralized Chat Center:** A dedicated `/chat` page, accessible from the main header, that lists all of a user's conversations in one place.
+-   **Complaint System:** A formal process for buyers to file a complaint after an item is delivered. It requires a reason and video evidence. The process puts the transaction `status` to `Complaint`, holding the funds until an admin resolves the dispute.
 
 ### Module E: History
 *Goal: To give users access to their activity history.*
--   **Purchase History:** A page for buyers to track the status of their purchases.
--   **My Items for Sale:** A dedicated page for sellers to track the status of items they have listed (Pending Approval, Auctioning, Sold, Rejected).
+-   **Purchase History:** A page for buyers to track the status of all their purchases.
+-   **My Items for Sale:** A page for sellers to track the status of items they have listed (Pending, Auctioning, Sold, Rejected).
 -   **Complaint History:** An archive of all filed complaints.
 
 ### Module F: Admin Panel
-*Goal: To provide an interface for admins to manage the entire platform.*
--   **Dedicated Admin Login & Protected Routes:** A separate and secure login system and routing.
--   **Dashboard Navigation:** A navigation menu to switch between admin features.
--   **Transaction Verification Page:** A dashboard to `Approve/Reject` proofs of payment.
--   **Product Approval Page:** A dashboard to `Approve/Reject` new product listings.
--   **Active Product Management Page:** A dashboard to view and remove currently active listings.
--   **User Management:** A feature to view the user list and apply sanctions.
+*Goal: To provide a complete interface for admins to manage the entire platform.*
+-   **Dedicated & Protected Routes:** A separate and secure login system and routing for the admin dashboard.
+-   **Dashboard Navigation:** A consistent navigation menu to switch between all admin features.
+-   **Management Pages:** Dashboards to `Approve/Reject` payments, product listings, manage active products, resolve user complaints, and view all registered users.
+-   **User Management:** A feature to view the user list, separated into admins and regular users.
 
 ### Module G: Machine Learning Service (Flask)
-*Goal: To integrate smart features to enhance the user experience.*
+*Goal: To integrate smart features to enhance the user experience (Planned).*
 -   **Recommendation Engine:** An API to recommend products to users.
 -   **Price Prediction:** An API to provide an estimated final auction price.
 
@@ -82,7 +81,7 @@ Below is a detailed breakdown of each module within this project.
 
 ## 🔧 Running the Project Locally
 
-To run this project on your computer, follow these steps.
+To run this project, follow these steps.
 
 ### Prerequisites
 -   Node.js & npm installed.
