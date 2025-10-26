@@ -79,6 +79,27 @@ Inspired by @thelazytitip @thelazymonday
 
 ---
 
+## 🚀 Database Seeding
+
+This project uses a sample dataset to populate the database for development and testing.
+
+1.  **Download the Raw Dataset**
+    Download the Amazon dataset (e.g., `Electronics.jsonl.gz`) from [https://amazon-reviews-2023.github.io/].
+    Place the file inside the `/datas/data` folder.
+
+2.  **Run the ETL Scripts**
+    Run the Python scripts to clean and transform the raw data into ready-to-use CSV files.
+    ```bash
+    python scripts/therajintitip_product.py
+    python scripts/therajintitip_user.py
+    ```
+
+3.  **Run the Seeder**
+    Run the Node.js seeder to import the CSV files into your database.
+    ```bash
+    node seeder.js
+    ```
+
 ## 🔧 Running the Project Locally
 
 To run this project, follow these steps.
