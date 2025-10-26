@@ -61,7 +61,7 @@ const ProductApprovalScreen = () => {
           {products.length === 0 ? (
             <p className="p-6 text-center text-gray-400">No products are waiting for approval.</p>
           ) : (
-            <table className="min-w-full divide-y divide-gray-700">
+            <table className="w-full divide-y divide-gray-700">
               <thead className="bg-gray-900">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Product Name</th>
@@ -74,10 +74,10 @@ const ProductApprovalScreen = () => {
               <tbody className="divide-y divide-gray-700">
                 {products.map(product => (
                   <tr key={product._id} className="hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{product.user.username}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">Rp {product.startingPrice.toLocaleString('id-ID')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{new Date(product.auctionEndDate).toLocaleDateString('id-ID')}</td>
+                    <td className="px-6 py-4 text-sm">{product.name}</td>
+                    <td className="px-6 py-4 text-sm">{product.user.username}</td>
+                    <td className="px-6 py-4 text-sm">Rp {product.startingPrice.toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4 text-sm">{new Date(product.auctionEndDate).toLocaleDateString('id-ID')}</td>
                     <td className="px-6 py-4 text-center">
                       <Button onClick={() => setSelectedProduct(product)} className="text-xs">
                         Review
@@ -101,7 +101,9 @@ const ProductApprovalScreen = () => {
               className="w-full object-contain rounded-lg mb-4 max-h-80"
             />
             <h3 className="font-semibold">Description:</h3>
-            <p className="bg-gray-700 p-2 rounded mb-4">{selectedProduct.description}</p>
+            <p className="bg-gray-700 p-2 rounded mb-4 max-h-60 overflow-y-auto whitespace-pre-wrap">
+              {selectedProduct.description}
+            </p>
             <div className="flex justify-end gap-4 mt-6">
               <Button onClick={() => setSelectedProduct(null)} className="bg-gray-600 hover:bg-gray-700">Close</Button>
               <Button onClick={() => { handleApproval(selectedProduct._id, 'reject'); setSelectedProduct(null); }} variant="danger">Reject</Button>

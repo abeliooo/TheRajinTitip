@@ -80,7 +80,7 @@ const ProductManagementScreen = () => {
       ) : (
         <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
           {products.length > 0 ? (
-            <table className="min-w-full divide-y divide-gray-700">
+            <table className="w-full divide-y divide-gray-700">
               <thead className="bg-gray-900">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Product</th>
@@ -92,7 +92,7 @@ const ProductManagementScreen = () => {
               <tbody className="divide-y divide-gray-700">
                 {products.map((product) => (
                   <tr key={product._id} className="hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-16 w-16">
                           <img 
@@ -106,9 +106,9 @@ const ProductManagementScreen = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{product.user.username}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">Rp {product.currentPrice.toLocaleString('id-ID')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 text-sm">{product.user.username}</td>
+                    <td className="px-6 py-4 text-sm">Rp {product.currentPrice.toLocaleString('id-ID')}</td>
+                    <td className="px-6 py-4 text-sm">
                       <Button onClick={() => openRemoveModal(product)} variant="danger" className="text-xs">
                         Remove
                       </Button>

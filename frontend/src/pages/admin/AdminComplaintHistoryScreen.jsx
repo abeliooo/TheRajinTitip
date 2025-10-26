@@ -52,9 +52,9 @@ const AdminComplaintHistoryScreen = () => {
               <tbody className="divide-y divide-gray-700">
                 {resolvedComplaints.map((tx) => (
                   <tr key={tx._id} className="hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{tx.product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{tx.buyer.username}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{tx.seller.username}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{tx.product?.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{tx.buyer?.username}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{tx.seller?.username}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         tx.status === 'Completed' ? 'bg-green-800 text-green-100' : 'bg-red-800 text-red-100'
@@ -64,7 +64,7 @@ const AdminComplaintHistoryScreen = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Link to={`/admin/complaints/${tx._id}`}>
-                        <Button className="bg-gray-600 hover:bg-gray-700 text-xs">
+                        <Button className="bg-orange-600 hover:bg-gray-700 text-xs">
                           View Details
                         </Button>
                       </Link>

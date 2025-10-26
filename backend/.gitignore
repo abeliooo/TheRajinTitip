@@ -31,3 +31,5 @@ build/
 # editor/IDE
 .vscode/
 .idea/
+
+/uploads
