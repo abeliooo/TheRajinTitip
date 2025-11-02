@@ -56,15 +56,16 @@ const ChatScreen = () => {
             <div>
               {conversations.length > 0 ? (
                 conversations.map((convo) => {
-                  const otherUser = userInfo._id === convo.buyer._id ? convo.seller : convo.buyer;
+                  const otherUser = userInfo._id === convo.buyer?._id ? convo.seller : convo.buyer;
                   return (
                     <div 
                       key={convo._id} 
                       className={`p-4 border-b border-gray-700 hover:bg-gray-700 cursor-pointer ${activeConversation?._id === convo._id ? 'bg-orange-900/50' : ''}`}
                       onClick={() => handleConversationClick(convo)}
                     >
-                      <p className="font-bold truncate">{convo.product.name}</p>
-                      <p className="text-sm text-gray-400">vs {otherUser.username}</p>
+                      <p className="font-bold truncate">{convo.product?.name || 'Product Deleted'}</p>
+                      
+                      <p className="text-sm text-gray-400">vs {otherUser?.username || 'Deleted User'}</p>
                     </div>
                   );
                 })
