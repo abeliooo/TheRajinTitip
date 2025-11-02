@@ -56,7 +56,7 @@ const ChatBox = ({ transaction, userInfo }) => {
     const messageData = {
       transaction: transactionId,
       sender: userInfo._id,
-      receiver: transaction.buyer._id === userInfo._id ? transaction.seller._id : transaction.buyer._id,
+      receiver: transaction.buyer?._id === userInfo._id ? transaction.seller?._id : transaction.buyer?._id,
       content: newMessage,
     };
 
@@ -64,13 +64,13 @@ const ChatBox = ({ transaction, userInfo }) => {
     setNewMessage('');
   };
 
-  const otherUser = transaction.buyer._id === userInfo._id ? transaction.seller : transaction.buyer;
+  const otherUser = transaction.buyer?._id === userInfo._id ? transaction.seller : transaction.buyer;
 
   return (
     <div className="flex flex-col h-full bg-gray-900">
       <div className="p-4 border-b border-gray-700">
-        <p className="font-bold text-lg">{transaction.product.name}</p>
-        <p className="text-sm text-gray-400">Chat with {otherUser.username}</p>
+        <p className="font-bold text-lg">{transaction.product?.name || 'Product Deleted'}</p>
+        <p className="text-sm text-gray-400">Chat with {otherUser?.username || 'Deleted User'}</p>
       </div>
 
       <div className="p-4 flex-grow overflow-y-auto flex flex-col gap-3">
