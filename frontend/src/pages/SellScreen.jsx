@@ -29,9 +29,18 @@ const SellScreen = () => {
         },
       };
 
+        const localDate = new Date(auctionEndDate);
+        const utcDateString = localDate.toISOString();
+
       const { data } = await api.post(
         '/products',
-        { name, description, startingPrice, auctionEndDate, image },
+        { 
+          name, 
+          description, 
+          startingPrice, 
+          auctionEndDate: utcDateString, 
+          image 
+        },
         config
       );
 

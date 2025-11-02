@@ -50,7 +50,7 @@ const importProducts = async () => {
 
   } catch (error) {
     console.error('❌ Error:', error);
-  } finally {
+  } finally {``
     mongoose.connection.close();
     process.exit();
   }
