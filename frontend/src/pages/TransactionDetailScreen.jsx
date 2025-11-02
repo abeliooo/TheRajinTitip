@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import io from 'socket.io-client';
 import ComplaintModal from '../components/ComplaintModal';
 
-const socket = io('http://localhost:5000');
+const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const TransactionDetailScreen = () => {
   const [transaction, setTransaction] = useState(null);
