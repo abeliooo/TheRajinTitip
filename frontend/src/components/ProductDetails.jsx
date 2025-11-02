@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import api from '../api/axios';
@@ -7,20 +7,19 @@ import Input from './Input';
 import Button from './Button';
 import PaymentScreen from '../pages/PaymentScreen';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL);
-
 const ProductDetail = () => {
   const [product, setProduct] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
   const [bidAmount, setBidAmount] = React.useState('');
   const [success, setSuccess] = React.useState('');
+  const [socket, setSocket] = useState(null);
   const timeLeft = useCountdown(product.auctionEndDate);
   const navigate = useNavigate();
 
   const { id: productId } = useParams();
 
-  const userInfo = React.useMemo(() => {
+  const userInfo = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem('userInfo'));
     } catch (e) {
@@ -42,7 +41,7 @@ const ProductDetail = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
@@ -56,16 +55,29 @@ const ProductDetail = () => {
     };
     fetchProduct();
 
-    socket.on('bid_update', (updatedProduct) => {
-      if (updatedProduct._id === productId) {
-        setProduct(updatedProduct);
-      }
-    });
+    let newSocket = null;
+
+    if (userInfo) {
+      newSocket = io(process.env.REACT_APP_SOCKET_URL, {
+        auth: {
+          token: userInfo.token 
+        }
+      });
+      setSocket(newSocket);
+
+      newSocket.on('bid_update', (updatedProduct) => {
+        if (updatedProduct._id === productId) {
+          setProduct(updatedProduct);
+        }
+      });
+    }
 
     return () => {
-      socket.off('bid_update');
+      newSocket?.off('bid_update');
+      newSocket?.disconnect();
     };
-  }, [productId]);
+    
+  }, [productId, userInfo]);
 
   const placeBidHandler = async (e) => {
     e.preventDefault();
@@ -90,6 +102,17 @@ const ProductDetail = () => {
 
   const renderAuctionStatus = () => {
     if (!isAuctionEnded) {
+      if (!userInfo) {
+        return (
+          <div className="text-center bg-gray-700 p-6 rounded-lg">
+            <h3 className="text-xl font-bold text-gray-300">Please Log In to Bid</h3>
+            <p className="mt-2 text-gray-400">You must be logged in to participate in the auction.</p>
+            <Link to="/login">
+              <Button className="mt-4">Login</Button>
+            </Link>
+          </div>
+        );
+      }
       if (isSeller) {
         return (
           <div className="text-center bg-gray-700 p-6 rounded-lg">

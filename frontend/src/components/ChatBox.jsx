@@ -3,19 +3,26 @@ import api from '../api/axios';
 import io from 'socket.io-client';
 import Button from './Button';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL);
-
 const ChatBox = ({ transaction, userInfo }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [socket, setSocket] = useState(null);
   const chatEndRef = useRef(null);
 
   const transactionId = transaction?._id;
 
   useEffect(() => {
     if (transactionId) {
+
+      const newSocket = io(process.env.REACT_APP_SOCKET_URL, {
+        auth: {
+          token: userInfo.token
+        }
+      });
+      setSocket(newSocket);
+
       setLoading(true);
       const fetchMessages = async () => {
         try {
@@ -30,17 +37,18 @@ const ChatBox = ({ transaction, userInfo }) => {
       };
       fetchMessages();
 
-      socket.emit('join_room', transactionId);
+      newSocket.emit('join_room', transactionId);
 
       const messageListener = (message) => {
         if (message.transaction === transactionId) {
           setMessages((prevMessages) => [...prevMessages, message]);
         }
       };
-      socket.on('receive_message', messageListener);
+      newSocket.on('receive_message', messageListener);
 
       return () => {
-        socket.off('receive_message', messageListener);
+        newSocket.off('receive_message', messageListener);
+        newSocket.disconnect();
       };
     }
   }, [transactionId, userInfo]);
@@ -51,7 +59,7 @@ const ChatBox = ({ transaction, userInfo }) => {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (newMessage.trim() === '' || !userInfo) return;
+    if (newMessage.trim() === '' || !userInfo || !socket) return;
 
     const messageData = {
       transaction: transactionId,

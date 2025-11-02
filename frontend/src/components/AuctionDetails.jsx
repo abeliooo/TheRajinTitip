@@ -1,22 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { io } from "socket.io-client";
-
-const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 function AuctionDetail({ auctionId }) {
   const [bids, setBids] = useState([]);
+  const [socket, setSocket] = useState(null);
+
+  const userInfo = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userInfo'));
+    } catch (e) {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    socket.emit("joinAuction", auctionId);
+    let newSocket = null;
 
-    socket.on("bidUpdate", (data) => {
-      setBids((prev) => [...prev, data]);
-    });
+    if (auctionId && userInfo) {
+      newSocket = io(process.env.REACT_APP_SOCKET_URL, {
+        auth: {
+          token: userInfo.token
+        }
+      });
+      setSocket(newSocket);
+
+    newSocket.emit("joinAuction", auctionId);
+
+      newSocket.on("bidUpdate", (data) => {
+        setBids((prev) => [...prev, data]);
+      });
+    }
 
     return () => {
-      socket.off("bidUpdate");
+      newSocket?.off("bidUpdate");
+      newSocket?.disconnect();
     };
-  }, [auctionId]);
+  }, [auctionId, userInfo]);
 
   return (
     <div>
