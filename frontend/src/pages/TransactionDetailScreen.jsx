@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import Button from '../components/Button';
 import io from 'socket.io-client';
 import ComplaintModal from '../components/ComplaintModal';
 
-const socket = io(process.env.REACT_APP_SOCKET_URL);
-
 const TransactionDetailScreen = () => {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [userInfo, setUserInfo] = useState(null);
+  const [socket, setSocket] = useState(null);
   const [paymentProofFile, setPaymentProofFile] = useState(null);
   const [previewSource, setPreviewSource] = useState('');
   const [messages, setMessages] = useState([]);
@@ -21,15 +19,26 @@ const TransactionDetailScreen = () => {
   const { id: transactionId } = useParams();
   const navigate = useNavigate(); 
   const chatEndRef = useRef(null);
-  const isBuyer = userInfo && userInfo._id === transaction?.buyer._id;
+
+  const userInfo = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userInfo'));
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  const isBuyer = userInfo && userInfo._id === transaction?.buyer?._id;
 
   useEffect(() => {
-    const storedUserInfo = JSON.parse(localStorage.getItem('userInfo'));
-    setUserInfo(storedUserInfo);
-
     const fetchTransaction = async () => {
+      if (!userInfo) {
+        setLoading(false);
+        setError('User not found. Please log in.');
+        return;
+      }
       try {
-        const config = { headers: { Authorization: `Bearer ${storedUserInfo.token}` } };
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         const { data } = await api.get(`/transactions/${transactionId}`, config);
         setTransaction(data);
       } catch (err) {
@@ -39,10 +48,18 @@ const TransactionDetailScreen = () => {
       }
     };
     fetchTransaction();
-  }, [transactionId]);
+  }, [transactionId, userInfo]);
 
   useEffect(() => {
-    if (transaction && userInfo) { 
+    if (transaction && userInfo) {
+      
+      const newSocket = io(process.env.REACT_APP_SOCKET_URL, {
+        auth: {
+          token: userInfo.token 
+        }
+      });
+      setSocket(newSocket); 
+
       const fetchMessages = async () => {
         try {
           const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -54,15 +71,16 @@ const TransactionDetailScreen = () => {
       };
       fetchMessages();
 
-      socket.emit('join_room', transactionId);
+      newSocket.emit('join_room', transactionId);
 
       const messageListener = (message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
       };
-      socket.on('receive_message', messageListener);
+      newSocket.on('receive_message', messageListener);
 
       return () => {
-        socket.off('receive_message', messageListener);
+        newSocket.off('receive_message', messageListener);
+        newSocket.disconnect();
       };
     }
   }, [transaction, transactionId, userInfo]);
@@ -130,16 +148,23 @@ const TransactionDetailScreen = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (newMessage.trim() === '' || !userInfo) return;
+    if (newMessage.trim() === '' || !userInfo || !socket) return;
+
+    const receiverId = transaction.buyer?._id === userInfo._id ? transaction.seller?._id : transaction.buyer?._id;
+
+    if (!receiverId) {
+      console.error("Cannot determine message receiver.");
+      return;
+    }
 
     const messageData = {
       transaction: transactionId,
       sender: userInfo._id,
-      receiver: transaction.buyer._id === userInfo._id ? transaction.seller._id : transaction.buyer._id,
+      receiver: receiverId,
       content: newMessage,
     };
 
-    socket.emit('send_message', messageData);
+    socket.emit('send_message', messageData)
     setNewMessage('');
   };
 
@@ -159,10 +184,10 @@ const TransactionDetailScreen = () => {
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-6">
             <h1 className="text-2xl font-bold mb-4">Transaction Details</h1>
             <div className="flex items-center gap-4 mb-6">
-          <img src={product.image || '/images/sample.jpg'} alt={product.name} className="w-24 h-24 object-cover rounded-md" />
+            <img src={product?.image || '/images/sample.jpg'} alt={product?.name} className="w-24 h-24 object-cover rounded-md" />
               <div>
-                <h2 className="font-bold text-xl">{product.name}</h2>
-                <p className="text-lg text-orange-400 font-semibold">Rp {amount.toLocaleString('id-ID')}</p>
+                <h2 className="font-bold text-xl">{product?.name || 'Product Not Found'}</h2>
+                <p className="text-lg text-orange-400 font-semibold">Rp {amount?.toLocaleString('id-ID') || '0'}</p>
                 <p className="text-sm text-gray-400">Status: <span className="font-semibold">{status}</span></p>
               </div>
             </div>
@@ -172,7 +197,7 @@ const TransactionDetailScreen = () => {
                 <>
                   <h3 className="font-semibold mb-2">Payment Instructions</h3>
                   <p className="text-sm text-gray-300">
-                    Please transfer the exact amount of <span className="font-bold text-orange-400">Rp {amount.toLocaleString('id-ID')}</span> to the following bank account:
+                    Please transfer the exact amount of <span className="font-bold text-orange-400">Rp {amount?.toLocaleString('id-ID')}</span> to the following bank account:
                   </p>
                   <div className="bg-gray-900 my-4 p-3 rounded-md">
                     <p className="font-mono">Bank Name: RajinTitip Bank</p>
