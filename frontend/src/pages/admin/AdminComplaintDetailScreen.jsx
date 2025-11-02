@@ -73,7 +73,7 @@ const AdminComplaintDetailScreen = () => {
               <p className="text-sm text-gray-400">Reason:</p>
               <p className="mb-4 bg-gray-900 p-2 rounded">{transaction.complaintDetails.reason}</p>
               <p className="text-sm text-gray-400">Video Evidence:</p>
-              <a href={`http://localhost:5000/${transaction.complaintDetails.videoUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+              <a href={`${transaction.complaintDetails.videoUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                 Watch Video
               </a>
             </div>

@@ -69,7 +69,7 @@ const AdminDashboardScreen = () => {
                         Rp {tx.amount.toLocaleString('id-ID')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <a href={`http://localhost:5000/${tx.paymentProof}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                        <a href={`${tx.paymentProof}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                           View Proof
                         </a>
                       </td>
