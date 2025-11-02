@@ -3,7 +3,7 @@ import api from '../api/axios';
 import io from 'socket.io-client';
 import Button from './Button';
 
-const socket = io('http://localhost:5000');
+const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const ChatBox = ({ transaction, userInfo }) => {
   const [messages, setMessages] = useState([]);

@@ -38,7 +38,7 @@ const ComplaintHistory = () => {
         complaints.map((complaint) => (
           <div key={complaint._id} className="bg-gray-800 rounded-lg p-4 border border-gray-700 flex items-center gap-4">
             <img 
-              src={complaint.product.image ? `http://localhost:5000${complaint.product.image}` : '/images/sample.jpg'} 
+              src={complaint.product.image ? `${complaint.product.image}` : '/images/sample.jpg'} 
               alt={complaint.product.name} 
               className="w-16 h-16 object-cover rounded-md"
             />

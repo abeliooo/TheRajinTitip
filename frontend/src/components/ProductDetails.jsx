@@ -7,7 +7,7 @@ import Input from './Input';
 import Button from './Button';
 import PaymentScreen from '../pages/PaymentScreen';
 
-const socket = io('http://localhost:5000');
+const socket = io(process.env.REACT_APP_SOCKET_URL);
 
 const ProductDetail = () => {
   const [product, setProduct] = React.useState({});
